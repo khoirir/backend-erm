@@ -11,7 +11,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | This value is the name of your application. This value is used when the
-    | framework needs to place the application's name in a notification or
+    | framework needs to place the application's name id a notification or
     | any other location as required by the application or its packages.
     |
     */
@@ -24,8 +24,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | This value determines the "environment" your application is currently
-    | running in. This may determine how you prefer to configure various
-    | services the application utilizes. Set this in your ".env" file.
+    | running id. This may determine how you prefer to configure various
+    | services the application utilizes. Set this id your ".env" file.
     |
     */
 
@@ -36,7 +36,7 @@ return [
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |
-    | When your application is in debug mode, detailed error messages with
+    | When your application is id debug mode, detailed error messages with
     | stack traces will be shown on every error that occurs within your
     | application. If disabled, a simple generic error page is shown.
     |
@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Jakarta',
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'id',
 
     /*
     |--------------------------------------------------------------------------
