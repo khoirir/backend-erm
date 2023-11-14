@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\UserModel;
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +26,7 @@ class ApiAuthMiddleware
         }
 
         $user = UserModel::where('id',$token)->first();
-        if(!$user || $user->expired_at <= now()){
+        if(!$user || $user->expired_at <= Carbon::now()){
             $authenticate = false;
         }else {
             Auth::login($user);

@@ -2,9 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\PegawaiModel;
 use App\Models\UserModel;
-use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
@@ -14,23 +13,23 @@ class UserTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        DB::delete("DELETE FROM user_erm");
+        DB::delete("DELETE FROM user_erm WHERE kd_dokter = 'TEST'");
     }
 
     public function testLoginSuccess(){
         $response = $this->post('/api/user/login', [
-            "username" => "DRDEDEN",
-            "password" => "DRDEDEN123"
+            "username" => "TEST",
+            "password" => "TEST"
         ])->assertStatus(200)
             ->assertJson([
                 "data" => [
-                    "kdDokter" => "DRDEDEN"
+                    "kdDokter" => "TEST"
                 ]
             ])
             ->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
-        $user = UserModel::where('kd_dokter', 'DRDEDEN')->first();
+        $user = UserModel::query()->where('kd_dokter', 'TEST')->first();
         self::assertNotNull($user);
 
     }
@@ -54,8 +53,8 @@ class UserTest extends TestCase
 
     public function testLoginUsernameSalah(){
         $response = $this->post('/api/user/login', [
-            "username" => "DRFERDII",
-            "password" => "DRFERDI123"
+            "username" => "SALAH",
+            "password" => "TEST"
         ])->assertStatus(401)
             ->assertJson(
                 [
@@ -71,8 +70,8 @@ class UserTest extends TestCase
 
     public function testLoginPasswordSalah(){
         $response = $this->post('/api/user/login', [
-            "username" => "DRFERDI",
-            "password" => "DRFERDI122"
+            "username" => "TEST",
+            "password" => "SALAH"
         ])->assertStatus(401)
             ->assertJson(
                 [
@@ -88,8 +87,8 @@ class UserTest extends TestCase
 
     public function testLogoutSukses(){
         $login = $this->post('/api/user/login', [
-            "username" => "DRFERDI",
-            "password" => "DRFERDI123"
+            "username" => "TEST",
+            "password" => "TEST"
         ])->json();
         $response = $this->delete(uri:'/api/user/logout', headers:[
             'Authorization' => $login['data']['token']
@@ -122,12 +121,12 @@ class UserTest extends TestCase
 
     public function testLogoutTokenExpired(){
         $login = $this->post('/api/user/login', [
-            "username" => "DRFERDI",
-            "password" => "DRFERDI123"
+            "username" => "TEST",
+            "password" => "TEST"
         ])->json();
 
-        UserModel::where('id', $login['data']['token'])
-            ->update(['expired_at' => now()]);
+        UserModel::query()->where('id', $login['data']['token'])
+            ->update(['expired_at' => Carbon::now()]);
 
         $response = $this->delete(uri:'/api/user/logout', headers:[
             'Authorization' => $login['data']['token']

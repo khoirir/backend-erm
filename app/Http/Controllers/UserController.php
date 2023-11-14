@@ -7,10 +7,10 @@ use App\Http\Resources\UserResource;
 use App\Models\DokterModel;
 use App\Models\PegawaiModel;
 use App\Models\UserModel;
+use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +18,10 @@ class UserController extends Controller
 {
     public function login(UserLoginRequest $request): UserResource {
         $data = $request->validated();
-        $dokter = DokterModel::where('kd_dokter', $data['username'])->where('status', '1')->first();
+        $dokter = DokterModel::query()
+            ->where('kd_dokter', $data['username'])
+            ->where('status', '1')
+            ->first();
         if(!$dokter){
             throw new HttpResponseException(response([
                 "error" => [
@@ -43,7 +46,8 @@ class UserController extends Controller
             ], 401));
         }
 
-        $pegawai = PegawaiModel::select('nik', 'nama', 'photo')
+        $pegawai = PegawaiModel::query()
+            ->select('nik', 'nama', 'photo')
             ->where('nik', $dokter['kd_dokter'])
             ->where('stts_aktif', 'AKTIF')
             ->first();

@@ -20,4 +20,8 @@ class DokterModel extends Model
     public function pegawai(): BelongsTo {
         return $this->belongsTo(PegawaiModel::class, "kd_dokter", "nik");
     }
+
+    public function registrasi(): HasMany {
+        return $this->hasMany(RegistrasiModel::class, 'kd_dokter', 'kd_dokter');
+    }
 }
