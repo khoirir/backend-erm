@@ -16,7 +16,8 @@ class UserTest extends TestCase
         DB::delete("DELETE FROM user_erm WHERE kd_dokter = 'TEST'");
     }
 
-    public function testLoginSuccess(){
+    public function testLoginSuccess()
+    {
         $response = $this->post('/api/user/login', [
             "username" => "TEST",
             "password" => "TEST"
@@ -34,7 +35,8 @@ class UserTest extends TestCase
 
     }
 
-    public function testLoginTidakValid(){
+    public function testLoginTidakValid()
+    {
         $response = $this->post('/api/user/login', [
             "username" => "",
             "password" => ""
@@ -51,7 +53,8 @@ class UserTest extends TestCase
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
     }
 
-    public function testLoginUsernameSalah(){
+    public function testLoginUsernameSalah()
+    {
         $response = $this->post('/api/user/login', [
             "username" => "SALAH",
             "password" => "TEST"
@@ -68,7 +71,8 @@ class UserTest extends TestCase
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
     }
 
-    public function testLoginPasswordSalah(){
+    public function testLoginPasswordSalah()
+    {
         $response = $this->post('/api/user/login', [
             "username" => "TEST",
             "password" => "SALAH"
@@ -85,12 +89,13 @@ class UserTest extends TestCase
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
     }
 
-    public function testLogoutSukses(){
+    public function testLogoutSukses()
+    {
         $login = $this->post('/api/user/login', [
             "username" => "TEST",
             "password" => "TEST"
         ])->json();
-        $response = $this->delete(uri:'/api/user/logout', headers:[
+        $response = $this->delete(uri: '/api/user/logout', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(200)
             ->assertJson(
@@ -104,8 +109,9 @@ class UserTest extends TestCase
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
     }
 
-    public function testLogoutTidakValid(){
-        $response = $this->delete(uri:'/api/user/logout', headers:[
+    public function testLogoutTidakValid()
+    {
+        $response = $this->delete(uri: '/api/user/logout', headers: [
             'Authorization' => ''
         ])->assertStatus(401)
             ->assertJson(
@@ -119,7 +125,8 @@ class UserTest extends TestCase
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
     }
 
-    public function testLogoutTokenExpired(){
+    public function testLogoutTokenExpired()
+    {
         $login = $this->post('/api/user/login', [
             "username" => "TEST",
             "password" => "TEST"
@@ -128,7 +135,7 @@ class UserTest extends TestCase
         UserModel::query()->where('id', $login['data']['token'])
             ->update(['expired_at' => Carbon::now()]);
 
-        $response = $this->delete(uri:'/api/user/logout', headers:[
+        $response = $this->delete(uri: '/api/user/logout', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(401)
             ->assertJson(

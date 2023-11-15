@@ -14,31 +14,31 @@ class ApiAuthMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $token = $request->header("Authorization");
         $authenticate = true;
 
-        if(!$token){
+        if (!$token) {
             $authenticate = false;
         }
 
-        $user = UserModel::where('id',$token)->first();
-        if(!$user || $user->expired_at <= Carbon::now()){
+        $user = UserModel::where('id', $token)->first();
+        if (!$user || $user->expired_at <= Carbon::now()) {
             $authenticate = false;
-        }else {
+        } else {
             Auth::login($user);
         }
 
-        if($authenticate){
+        if ($authenticate) {
             return $next($request);
-        }else{
+        } else {
             return response()->json([
-               "error" => [
-                   "pesan" => "UNAUTHORIZED"
-               ]
+                "error" => [
+                    "pesan" => "UNAUTHORIZED"
+                ]
             ])->setStatusCode(401);
         }
     }

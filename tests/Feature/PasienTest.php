@@ -19,13 +19,14 @@ class PasienTest extends TestCase
         DB::delete("DELETE FROM user_erm WHERE kd_dokter = 'TEST'");
     }
 
-    public function testGetDetailPasienSukses(){
+    public function testGetDetailPasienSukses()
+    {
         $login = $this->post('/api/user/login', [
             "username" => "TEST",
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri:'/api/irj/pasien/2023/11/14/000002', headers:[
+        $response = $this->get(uri: '/api/irj/pasien/2023/11/14/000002', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(200)
             ->assertJson(
@@ -39,8 +40,9 @@ class PasienTest extends TestCase
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
     }
 
-    public function testGetDetailPasienUnauthorized(){
-        $response = $this->get(uri:'/api/irj/pasien/2023/11/14/000002', headers:[
+    public function testGetDetailPasienUnauthorized()
+    {
+        $response = $this->get(uri: '/api/irj/pasien/2023/11/14/000002', headers: [
             'Authorization' => ''
         ])->assertStatus(401)
             ->assertJson(
@@ -54,13 +56,14 @@ class PasienTest extends TestCase
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
     }
 
-    public function testGetDetailPasienDokterLain(){
+    public function testGetDetailPasienDokterLain()
+    {
         $login = $this->post('/api/user/login', [
             "username" => "TEST",
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri:'/api/irj/pasien/2023/10/06/000004', headers:[
+        $response = $this->get(uri: '/api/irj/pasien/2023/10/06/000004', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(404)
             ->assertJson(
@@ -74,19 +77,241 @@ class PasienTest extends TestCase
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
     }
 
-    public function testGetDetailPasienNoRawatTidakDitemukan(){
+    public function testGetDetailPasienNoRawatTidakDitemukan()
+    {
         $login = $this->post('/api/user/login', [
             "username" => "TEST",
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri:'/api/irj/pasien/2023/11/14/000803', headers:[
+        $response = $this->get(uri: '/api/irj/pasien/2023/11/14/000803', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(404)
             ->assertJson(
                 [
                     "error" => [
                         "pesan" => "DATA PASIEN TIDAK DITEMUKAN"
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+    }
+
+    public function testListPasienPerDokter()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        self::assertCount(2, $response['data']);
+    }
+
+    public function testListPasienUnauthorized()
+    {
+        $response = $this->get(uri: '/api/irj/pasien', headers: [
+            'Authorization' => ''
+        ])->assertStatus(401)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => "UNAUTHORIZED"
+                    ]
+                ]
+            )
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+    }
+
+    public function testListPasienPerDokterBerdasarkanTanggal()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?tanggalAwal=2023-11-14&tanggalAkhir=2023-11-15', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        self::assertCount(3, $response['data']);
+        self::assertEquals(3, $response['meta']['total']);
+    }
+
+    public function testListPasienPerDokterBerdasarkanTanggalFormatTidakValid()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?tanggalAwal=14-11-2029&tanggalAkhir=yuig-rt-hh', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(400)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => []
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+    }
+
+    public function testListPasienPerDokterBerdasarkanLimit()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?limit=1&halaman=1', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        self::assertCount(1, $response['data']);
+        self::assertEquals(1, $response['meta']['halaman']);
+        self::assertEquals(1, $response['meta']['limit']);
+    }
+
+    public function testListPasienPerDokterBerdasarkanLimitTidakValid()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?limit=yu&halaman=iki', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(400)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => []
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+    }
+
+    public function testPencarianPasienBerdasarkanNama()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?pencarian=khoirir', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+
+        self::assertCount(1, $response['data']);
+        self::assertEquals(1, $response['meta']['total']);
+    }
+
+    public function testPencarianPasienBerdasarkanNoRawat()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?pencarian=2023/11/14/000001', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+
+        self::assertCount(1, $response['data']);
+        self::assertEquals(1, $response['meta']['total']);
+    }
+
+    public function testPencarianPasienBerdasarkanNoRM()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?pencarian=123456', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+
+        self::assertCount(1, $response['data']);
+        self::assertEquals(1, $response['meta']['total']);
+    }
+
+    public function testPencarianPasienBerdasarkanAlamat()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?pencarian=PUCANG', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+
+        self::assertCount(1, $response['data']);
+        self::assertEquals(1, $response['meta']['total']);
+    }
+
+    public function testPencarianPasienDokterLain()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?pencarian=2023/10/17/000001', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+
+        self::assertCount(0, $response['data']);
+        self::assertEquals(0, $response['meta']['total']);
+    }
+
+    public function testPencarianPasienParameterKurangDariTiga()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien?pencarian=12', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(400)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => []
                     ]
                 ]
             )->json();

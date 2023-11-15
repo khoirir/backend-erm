@@ -26,7 +26,7 @@ class PasienResource extends JsonResource
             "umur" => $this->resource['umur'],
             "jenisKelamin" => $this->resource['jenisKelamin'],
             "jenisBayar" => $this->resource['jenisBayar'],
-            "noTelpon" => $this->resource['noTelpon'],
+            "noTelepon" => $this->resource['noTelepon'],
             "statusPasien" => $this->resource['statusPasien'],
             "statusPoli" => $this->resource['statusPoli']
         ];
