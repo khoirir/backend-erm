@@ -35,6 +35,42 @@ class UserTest extends TestCase
 
     }
 
+    public function testLoginStatusPegawaiKeluar()
+    {
+        $response = $this->post('/api/user/login', [
+            "username" => "DENOK",
+            "password" => "DENOK123"
+        ])->assertStatus(401)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => "USERNAME ATAU PASSWORD SALAH"
+                    ]
+                ]
+            )
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+    }
+
+    public function testLoginStatusDokterTidakAktif()
+    {
+        $response = $this->post('/api/user/login', [
+            "username" => "NIXIE",
+            "password" => "NIXIE123"
+        ])->assertStatus(401)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => "USERNAME ATAU PASSWORD SALAH"
+                    ]
+                ]
+            )
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+    }
+
     public function testLoginTidakValid()
     {
         $response = $this->post('/api/user/login', [

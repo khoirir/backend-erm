@@ -18,6 +18,8 @@ Route::post('/user/login', [\App\Http\Controllers\UserController::class, 'login'
 Route::middleware(\App\Http\Middleware\ApiAuthMiddleware::class)->group(function () {
    Route::delete('/user/logout', [\App\Http\Controllers\UserController::class, 'logout']);
 
-   Route::get('/irj/pasien/{noRawat}', [\App\Http\Controllers\PasienController::class, 'get'])->where('noRawat', '.*');
-   Route::get('/irj/pasien', [\App\Http\Controllers\PasienController::class, 'dataPasien']);
+   Route::get('/irj/pasien/{noRawat}', [\App\Http\Controllers\PasienController::class, 'detail'])->where('noRawat', '.*');
+   Route::get('/irj/pasien', [\App\Http\Controllers\PasienController::class, 'listData']);
+   Route::get('/irj/pasien-rujukan/{noRawat}', [\App\Http\Controllers\PasienController::class, 'detailRujukan'])->where('noRawat', '.*');
+   Route::get('/irj/pasien-rujukan', [\App\Http\Controllers\PasienController::class, 'listDataRujukan']);
 });

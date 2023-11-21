@@ -13,23 +13,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use PhpParser\Builder;
 
 class UserController extends Controller
 {
-    public function login(UserLoginRequest $request): UserResource
+    public function login(UserLoginRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $dokter = DokterModel::query()
-            ->where('kd_dokter', $data['username'])
-            ->where('status', '1')
-            ->first();
-        if (!$dokter) {
-            throw new HttpResponseException(response([
-                "error" => [
-                    "pesan" => "USERNAME ATAU PASSWORD SALAH"
-                ]
-            ], 401));
-        }
 
         $userKey = env('USER_KEY');
         $passwordKey = env('PASSWORD_KEY');
@@ -37,7 +28,7 @@ class UserController extends Controller
             ->select(DB::raw('AES_DECRYPT(id_user, ?) as kd_dokter'))
             ->where('id_user', DB::raw('AES_ENCRYPT(?,?)'))
             ->where('password', DB::raw('AES_ENCRYPT(?,?)'))
-            ->setBindings([$userKey, $dokter->kd_dokter, $userKey, $data['password'], $passwordKey])
+            ->setBindings([$userKey, $data['username'], $userKey, $data['password'], $passwordKey])
             ->first();
         if (!$cekUser) {
             throw new HttpResponseException(response([
@@ -48,11 +39,21 @@ class UserController extends Controller
         }
 
         $pegawai = PegawaiModel::query()
-            ->select('nik', 'nama', 'photo')
-            ->where('nik', $dokter['kd_dokter'])
-            ->where('stts_aktif', 'AKTIF')
+            ->where('nik', $cekUser->kd_dokter)
+            ->where('stts_aktif','!=','KELUAR')
             ->first();
         if (!$pegawai) {
+            throw new HttpResponseException(response([
+                "error" => [
+                    "pesan" => "USERNAME ATAU PASSWORD SALAH"
+                ]
+            ], 401));
+        }
+
+        $dokter = $pegawai->dokter()
+            ->where('status', '1')
+            ->first();
+        if (!$dokter) {
             throw new HttpResponseException(response([
                 "error" => [
                     "pesan" => "USERNAME ATAU PASSWORD SALAH"
@@ -66,14 +67,7 @@ class UserController extends Controller
         ]);
         $user->save();
 
-        $dataResult = [
-            "kdDokter" => $pegawai->nik,
-            "namaDokter" => $pegawai->nama,
-            "foto" => "http://192.168.30.20/webapps/penggajian/" . $pegawai->photo,
-            "token" => $user->id,
-            "expiredToken" => date("Y-m-d H:i:s", strtotime($user->expired_at))
-        ];
-        return new UserResource($dataResult);
+        return (new UserResource($user))->response()->setStatusCode(200);
     }
 
     public function logout(Request $request): JsonResponse

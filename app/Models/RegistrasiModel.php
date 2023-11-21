@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RegistrasiModel extends Model
 {
@@ -24,5 +25,9 @@ class RegistrasiModel extends Model
 
     public function poli(): BelongsTo {
         return $this->belongsTo(PoliModel::class, "kd_poli", "kd_poli");
+    }
+
+    public function rujukanInternal(): HasMany {
+        return $this->hasMany(RujukanInternalModel::class, "no_rawat", "no_rawat");
     }
 }

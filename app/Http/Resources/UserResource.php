@@ -14,12 +14,13 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $expiredToken = date("Y-m-d H:i:s", strtotime($this->expired_at));
         return [
-            "kdDokter" => $this->resource['kdDokter'],
-            "namaDokter" => $this->resource['namaDokter'],
-            "foto" => $this->resource['foto'],
-            "token" => $this->resource['token'],
-            "expiredToken" => $this->resource['expiredToken']
+            "kdDokter" => $this->kd_dokter,
+            "namaDokter" => $this->dokter->nm_dokter,
+            "foto" => $this->dokter->pegawai->photo,
+            "token" => $this->id,
+            "expiredToken" => $expiredToken
         ];
     }
 }
