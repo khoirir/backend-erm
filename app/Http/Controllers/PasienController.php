@@ -18,6 +18,7 @@ class PasienController extends Controller
     public function detail(string $noRawat): PasienResource
     {
         $user = Auth::user();
+        $noRawat = str_replace('-', '/', $noRawat);
         $pasien = RegistrasiModel::query()
             ->where("no_rawat", $noRawat)
             ->where("kd_dokter", $user->kd_dokter)
@@ -61,6 +62,7 @@ class PasienController extends Controller
     public function detailRujukan(string $noRawat): PasienResource
     {
         $user = Auth::user();
+        $noRawat = str_replace('-', '/', $noRawat);
         $rujukan = RujukanInternalModel::query()
             ->where("no_rawat", $noRawat)
             ->where("kd_dokter", $user->kd_dokter)

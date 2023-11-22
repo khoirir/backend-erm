@@ -25,7 +25,7 @@ class PasienTest extends TestCase
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri: '/api/irj/pasien/2023/11/14/000002', headers: [
+        $response = $this->get(uri: '/api/irj/pasien/2023-11-14-000002', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(200)
             ->assertJson(
@@ -41,7 +41,7 @@ class PasienTest extends TestCase
 
     public function testGetDetailPasienUnauthorized()
     {
-        $response = $this->get(uri: '/api/irj/pasien/2023/11/14/000002', headers: [
+        $response = $this->get(uri: '/api/irj/pasien/2023-11-14-000002', headers: [
             'Authorization' => ''
         ])->assertStatus(401)
             ->assertJson(
@@ -62,7 +62,7 @@ class PasienTest extends TestCase
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri: '/api/irj/pasien/2023/10/06/000004', headers: [
+        $response = $this->get(uri: '/api/irj/pasien/2023-10-06-000004', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(404)
             ->assertJson(
@@ -83,7 +83,7 @@ class PasienTest extends TestCase
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri: '/api/irj/pasien/2023/11/14/000803', headers: [
+        $response = $this->get(uri: '/api/irj/pasien/2023-11-14-000803', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(404)
             ->assertJson(
@@ -110,7 +110,7 @@ class PasienTest extends TestCase
             ->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
-        self::assertCount(3, $response['data']);
+        self::assertCount(4, $response['data']);
     }
 
     public function testListPasienUnauthorized()
@@ -145,8 +145,8 @@ class PasienTest extends TestCase
             ->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
-        self::assertCount(3, $response['data']);
-        self::assertEquals(3, $response['meta']['total']);
+        self::assertCount(4, $response['data']);
+        self::assertEquals(4, $response['meta']['total']);
     }
 
     public function testListPasienPerDokterBerdasarkanTanggalFormatTidakValid()
@@ -328,7 +328,7 @@ class PasienTest extends TestCase
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri: '/api/irj/pasien-rujukan/2023/11/17/000003', headers: [
+        $response = $this->get(uri: '/api/irj/pasien-rujukan/2023-11-17-000003', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(200)
             ->assertJson(
@@ -347,7 +347,7 @@ class PasienTest extends TestCase
 
     public function testGetDetailPasienRujukanUnauthorized()
     {
-        $response = $this->get(uri: '/api/irj/pasien-rujukan/2023/11/17/000003', headers: [
+        $response = $this->get(uri: '/api/irj/pasien-rujukan/2023-11-17-000003', headers: [
             'Authorization' => ''
         ])->assertStatus(401)
             ->assertJson(
@@ -360,7 +360,7 @@ class PasienTest extends TestCase
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
     }
-//
+
     public function testGetDetailPasienRujukanDokterLain()
     {
         $login = $this->post('/api/user/login', [
@@ -368,7 +368,7 @@ class PasienTest extends TestCase
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri: '/api/irj/pasien-rujukan/2023/10/27/000002', headers: [
+        $response = $this->get(uri: '/api/irj/pasien-rujukan/2023-10-27-000002', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(404)
             ->assertJson(
@@ -389,7 +389,7 @@ class PasienTest extends TestCase
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri: '/api/irj/pasien-rujukan/2023/11/14/000001', headers: [
+        $response = $this->get(uri: '/api/irj/pasien-rujukan/2023-11-14-000001', headers: [
             'Authorization' => $login['data']['token']
         ])->assertStatus(404)
             ->assertJson(
@@ -443,9 +443,11 @@ class PasienTest extends TestCase
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri: '/api/irj/pasien-rujukan?tanggalAwal=2023-11-14&tanggalAkhir='.date('Y-m-d', strtotime(Carbon::now())), headers: [
-            'Authorization' => $login['data']['token']
-        ])->assertStatus(200)
+        $response = $this->get(
+            uri: '/api/irj/pasien-rujukan?tanggalAwal=2023-11-14&tanggalAkhir='.date('Y-m-d', strtotime(Carbon::now())),
+            headers: [
+                'Authorization' => $login['data']['token']
+            ])->assertStatus(200)
             ->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT));
