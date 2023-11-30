@@ -43,11 +43,11 @@ class PasienController extends Controller
         $halaman = $data['halaman'] ?? 1;
         $limit = $data['limit'] ?? 10;
 
-        $pasien = RegistrasiModel::query()
-            ->where("kd_dokter", $user->kd_dokter)
-            ->where("tgl_registrasi", ">=", $tanggalAwal)
-            ->where("tgl_registrasi", "<=", $tanggalAkhir)
-            ->where("stts", "!=", "Batal");
+        $pasien = RegistrasiModel::with(['dokter','pasien','rujukanInternal','poli'])
+            ->where('kd_dokter', $user->kd_dokter)
+            ->where('tgl_registrasi', '>=', $tanggalAwal)
+            ->where('tgl_registrasi', '<=', $tanggalAkhir)
+            ->where('stts', '!=', 'Batal');
 
         $pencarian = $request->input('pencarian');
         if ($pencarian) {
@@ -64,8 +64,8 @@ class PasienController extends Controller
         $user = Auth::user();
         $noRawat = str_replace('-', '/', $noRawat);
         $rujukan = RujukanInternalModel::query()
-            ->where("no_rawat", $noRawat)
-            ->where("kd_dokter", $user->kd_dokter)
+            ->where('no_rawat', $noRawat)
+            ->where('kd_dokter', $user->kd_dokter)
             ->first();
 
         if (!$rujukan) {
@@ -88,13 +88,13 @@ class PasienController extends Controller
         $halaman = $data['halaman'] ?? 1;
         $limit = $data['limit'] ?? 10;
 
-        $pasien = RegistrasiModel::query()
+        $pasien = RegistrasiModel::with(['dokter','pasien','rujukanInternal','poli'])
             ->whereHas('rujukanInternal', function (Builder $builder) use ($user) {
                 $builder->where('kd_dokter', $user->kd_dokter);
             })
-            ->where("tgl_registrasi", ">=", $tanggalAwal)
-            ->where("tgl_registrasi", "<=", $tanggalAkhir)
-            ->where("stts", "!=", "Batal");
+            ->where('tgl_registrasi', '>=', $tanggalAwal)
+            ->where('tgl_registrasi', '<=', $tanggalAkhir)
+            ->where('stts', '!=', 'Batal');
 
         $pencarian = $request->input('pencarian');
         if ($pencarian) {

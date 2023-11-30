@@ -36,7 +36,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testGetDetailPasienSukses"]);
     }
 
     public function testGetDetailPasienUnauthorized()
@@ -52,7 +52,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testGetDetailPasienUnauthorized"]);
     }
 
     public function testGetDetailPasienDokterLain()
@@ -73,7 +73,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testGetDetailPasienDokterLain"]);
     }
 
     public function testGetDetailPasienNoRawatTidakDitemukan()
@@ -94,7 +94,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testGetDetailPasienNoRawatTidakDitemukan"]);
     }
 
     public function testListPasienPerDokter()
@@ -109,7 +109,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienPerDokter"]);
         self::assertCount(4, $response['data']);
     }
 
@@ -127,7 +127,7 @@ class PasienTest extends TestCase
             )
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienUnauthorized"]);
     }
 
     public function testListPasienPerDokterBerdasarkanTanggal()
@@ -144,7 +144,7 @@ class PasienTest extends TestCase
             ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienPerDokterBerdasarkanTanggal"]);
         self::assertCount(4, $response['data']);
         self::assertEquals(4, $response['meta']['total']);
     }
@@ -167,7 +167,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienPerDokterBerdasarkanTanggalFormatTidakValid"]);
     }
 
     public function testListPasienPerDokterBerdasarkanLimit()
@@ -182,7 +182,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienPerDokterBerdasarkanLimit"]);
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['halaman']);
         self::assertEquals(1, $response['meta']['limit']);
@@ -206,7 +206,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienPerDokterBerdasarkanLimitTidakValid"]);
     }
 
     public function testPencarianPasienBerdasarkanNama()
@@ -221,7 +221,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienBerdasarkanNama"]);
 
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['total']);
@@ -239,7 +239,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienBerdasarkanNoRawat"]);
 
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['total']);
@@ -257,7 +257,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienBerdasarkanNoRM"]);
 
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['total']);
@@ -275,7 +275,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienBerdasarkanAlamat"]);
 
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['total']);
@@ -293,7 +293,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienDokterLain"]);
 
         self::assertCount(0, $response['data']);
         self::assertEquals(0, $response['meta']['total']);
@@ -317,7 +317,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienParameterKurangDariTiga"]);
     }
 
 
@@ -342,7 +342,7 @@ class PasienTest extends TestCase
         self::assertNotNull($response['data']['dokterAsal']);
         self::assertNotNull($response['data']['poliAsal']);
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testGetDetailPasienRujukanSukses"]);
     }
 
     public function testGetDetailPasienRujukanUnauthorized()
@@ -358,7 +358,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testGetDetailPasienRujukanUnauthorized"]);
     }
 
     public function testGetDetailPasienRujukanDokterLain()
@@ -379,7 +379,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testGetDetailPasienRujukanDokterLain"]);
     }
 
     public function testGetDetailPasienRujukanNoRawatTidakDitemukan()
@@ -400,7 +400,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testGetDetailPasienRujukanNoRawatTidakDitemukan"]);
     }
 
     public function testListPasienRujukanPerDokter()
@@ -415,7 +415,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienRujukanPerDokter"]);
         self::assertCount(2, $response['data']);
     }
 
@@ -433,7 +433,7 @@ class PasienTest extends TestCase
             )
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienRujukanUnauthorized"]);
     }
 
     public function testListPasienRujukanPerDokterBerdasarkanTanggal()
@@ -450,7 +450,7 @@ class PasienTest extends TestCase
             ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienRujukanPerDokterBerdasarkanTanggal"]);
         self::assertCount(2, $response['data']);
         self::assertEquals(2, $response['meta']['total']);
     }
@@ -473,7 +473,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienRujukanPerDokterBerdasarkanTanggalFormatTidakValid"]);
     }
 
     public function testListPasienRujukanPerDokterBerdasarkanLimit()
@@ -488,7 +488,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienRujukanPerDokterBerdasarkanLimit"]);
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['halaman']);
         self::assertEquals(1, $response['meta']['limit']);
@@ -512,7 +512,7 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPasienRujukanPerDokterBerdasarkanLimitTidakValid"]);
     }
 
     public function testPencarianPasienRujukanBerdasarkanNama()
@@ -527,7 +527,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienRujukanBerdasarkanNama"]);
 
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['total']);
@@ -545,7 +545,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienRujukanBerdasarkanNoRawat"]);
 
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['total']);
@@ -563,7 +563,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienRujukanBerdasarkanNoRM"]);
 
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['total']);
@@ -581,7 +581,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienRujukanBerdasarkanAlamat"]);
 
         self::assertCount(1, $response['data']);
         self::assertEquals(1, $response['meta']['total']);
@@ -599,7 +599,7 @@ class PasienTest extends TestCase
         ])->assertStatus(200)
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienRujukanDokterLain"]);
 
         self::assertCount(0, $response['data']);
         self::assertEquals(0, $response['meta']['total']);
@@ -623,6 +623,6 @@ class PasienTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPasienRujukanParameterKurangDariTiga"]);
     }
 }

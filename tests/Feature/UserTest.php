@@ -16,7 +16,7 @@ class UserTest extends TestCase
         DB::delete("DELETE FROM user_erm WHERE kd_dokter = 'TEST'");
     }
 
-    public function testLoginSuccess()
+    public function testLoginSukses()
     {
         $response = $this->post('/api/user/login', [
             "username" => "TEST",
@@ -29,7 +29,7 @@ class UserTest extends TestCase
             ])
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLoginSuccess"]);
         $user = UserModel::query()->where('kd_dokter', 'TEST')->first();
         self::assertNotNull($user);
 
@@ -50,7 +50,7 @@ class UserTest extends TestCase
             )
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLoginStatusPegawaiKeluar"]);
     }
 
     public function testLoginStatusDokterTidakAktif()
@@ -68,7 +68,7 @@ class UserTest extends TestCase
             )
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLoginStatusDokterTidakAktif"]);
     }
 
     public function testLoginTidakValid()
@@ -86,7 +86,7 @@ class UserTest extends TestCase
             )
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLoginTidakValid"]);
     }
 
     public function testLoginUsernameSalah()
@@ -104,7 +104,7 @@ class UserTest extends TestCase
             )
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLoginUsernameSalah"]);
     }
 
     public function testLoginPasswordSalah()
@@ -122,7 +122,7 @@ class UserTest extends TestCase
             )
             ->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLoginPasswordSalah"]);
     }
 
     public function testLogoutSukses()
@@ -142,7 +142,7 @@ class UserTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLogoutSukses"]);
     }
 
     public function testLogoutTidakValid()
@@ -158,7 +158,7 @@ class UserTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLogoutTidakValid"]);
     }
 
     public function testLogoutTokenExpired()
@@ -182,7 +182,7 @@ class UserTest extends TestCase
                 ]
             )->json();
 
-        Log::info(json_encode($response, JSON_PRETTY_PRINT));
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLogoutTokenExpired"]);
     }
 
 }

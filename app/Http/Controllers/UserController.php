@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use PhpParser\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserController extends Controller
 {
@@ -40,7 +40,10 @@ class UserController extends Controller
 
         $pegawai = PegawaiModel::query()
             ->where('nik', $cekUser->kd_dokter)
-            ->where('stts_aktif','!=','KELUAR')
+            ->where('stts_aktif', '!=', 'KELUAR')
+            ->whereHas('dokter', function (Builder $builder) {
+                $builder->where('status', '1');
+            })
             ->first();
         if (!$pegawai) {
             throw new HttpResponseException(response([
@@ -50,23 +53,11 @@ class UserController extends Controller
             ], 401));
         }
 
-        $dokter = $pegawai->dokter()
-            ->where('status', '1')
-            ->first();
-        if (!$dokter) {
-            throw new HttpResponseException(response([
-                "error" => [
-                    "pesan" => "USERNAME ATAU PASSWORD SALAH"
-                ]
-            ], 401));
-        }
-
         $user = new UserModel([
-            "kd_dokter" => $dokter->kd_dokter,
+            "kd_dokter" => $pegawai->dokter->kd_dokter,
             "expired_at" => Carbon::now()->addMonth()
         ]);
         $user->save();
-
         return (new UserResource($user))->response()->setStatusCode(200);
     }
 
