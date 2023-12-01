@@ -68,7 +68,7 @@ class PasienTest extends TestCase
             ->assertJson(
                 [
                     "error" => [
-                        "pesan" => "DATA PASIEN TIDAK DITEMUKAN"
+                        "pesan" => "PASIEN DENGAN NO. RAWAT 2023/10/06/000004 TIDAK DITEMUKAN"
                     ]
                 ]
             )->json();
@@ -89,7 +89,7 @@ class PasienTest extends TestCase
             ->assertJson(
                 [
                     "error" => [
-                        "pesan" => "DATA PASIEN TIDAK DITEMUKAN"
+                        "pesan" => "PASIEN DENGAN NO. RAWAT 2023/11/14/000803 TIDAK DITEMUKAN"
                     ]
                 ]
             )->json();
@@ -374,7 +374,7 @@ class PasienTest extends TestCase
             ->assertJson(
                 [
                     "error" => [
-                        "pesan" => "DATA PASIEN RUJUKAN TIDAK DITEMUKAN"
+                        "pesan" => "PASIEN RUJUKAN DENGAN NO. RAWAT 2023/10/27/000002 TIDAK DITEMUKAN"
                     ]
                 ]
             )->json();
@@ -395,7 +395,7 @@ class PasienTest extends TestCase
             ->assertJson(
                 [
                     "error" => [
-                        "pesan" => "DATA PASIEN RUJUKAN TIDAK DITEMUKAN"
+                        "pesan" => "PASIEN RUJUKAN DENGAN NO. RAWAT 2023/11/14/000001 TIDAK DITEMUKAN"
                     ]
                 ]
             )->json();

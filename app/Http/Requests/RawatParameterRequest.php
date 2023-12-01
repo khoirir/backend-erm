@@ -5,8 +5,9 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Routing\Route;
 
-class InputParameterRequest extends FormRequest
+class RawatParameterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,12 +25,19 @@ class InputParameterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tanggalAwal' => ['date_format:Y-m-d'],
-            'tanggalAkhir' => ['date_format:Y-m-d'],
-            'pencarian' => ['min:3'],
-            'halaman' => ['numeric'],
-            'limit' => ['numeric']
+            "noRawat" => ['required'],
+            "tanggalRawat" => ['required', 'date_format:Y-m-d'],
+            "jamRawat" => ['required', 'date_format:H:i:s'],
         ];
+    }
+
+    public function validationData(): array
+    {
+        return array_merge($this->request->all(), [
+            'noRawat' => request()->route('noRawat'),
+            'tanggalRawat' => request()->route('tanggalRawat'),
+            'jamRawat' => request()->route('jamRawat'),
+        ]);
     }
 
     protected function failedValidation(Validator $validator)

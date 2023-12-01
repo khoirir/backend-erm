@@ -16,10 +16,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/user/login', [\App\Http\Controllers\UserController::class, 'login']);
 Route::middleware(\App\Http\Middleware\ApiAuthMiddleware::class)->group(function () {
-   Route::delete('/user/logout', [\App\Http\Controllers\UserController::class, 'logout']);
+    Route::delete('/user/logout', [\App\Http\Controllers\UserController::class, 'logout']);
 
-   Route::get('/irj/pasien/{noRawat}', [\App\Http\Controllers\PasienController::class, 'detail']);
-   Route::get('/irj/pasien', [\App\Http\Controllers\PasienController::class, 'listData']);
-   Route::get('/irj/pasien-rujukan/{noRawat}', [\App\Http\Controllers\PasienController::class, 'detailRujukan']);
-   Route::get('/irj/pasien-rujukan', [\App\Http\Controllers\PasienController::class, 'listDataRujukan'])->where('rujukan', 'rujukan');
+    Route::controller(\App\Http\Controllers\PasienController::class)->group(function () {
+        Route::get('/irj/pasien/{noRawat}', 'detail');
+        Route::get('/irj/pasien', 'listData');
+        Route::get('/irj/pasien-rujukan/{noRawat}', 'detailRujukan');
+        Route::get('/irj/pasien-rujukan', 'listDataRujukan')->where('rujukan', 'rujukan');
+    });
+
+    Route::controller(\App\Http\Controllers\PemeriksaanController::class)->group(function () {
+        Route::post('/irj/pasien/{noRawat}/pemeriksaan', 'simpan');
+//        Route::post('/irj/pasien-rujukan/{noRawat}/pemeriksaan', 'simpan');
+        Route::get('/irj/pasien/{noRawat}/pemeriksaan/{tanggalRawat}/{jamRawat}', 'detail');
+    });
 });

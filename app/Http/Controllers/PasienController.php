@@ -27,7 +27,7 @@ class PasienController extends Controller
         if (!$pasien) {
             throw new HttpResponseException(response([
                 "error" => [
-                    "pesan" => "DATA PASIEN TIDAK DITEMUKAN"
+                    "pesan" => "PASIEN DENGAN NO. RAWAT ".$noRawat." TIDAK DITEMUKAN"
                 ]
             ], 404));
         }
@@ -71,7 +71,7 @@ class PasienController extends Controller
         if (!$rujukan) {
             throw new HttpResponseException(response([
                 "error" => [
-                    "pesan" => "DATA PASIEN RUJUKAN TIDAK DITEMUKAN"
+                    "pesan" => "PASIEN RUJUKAN DENGAN NO. RAWAT ".$noRawat." TIDAK DITEMUKAN"
                 ]
             ], 404));
         }

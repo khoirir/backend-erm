@@ -24,7 +24,7 @@ return [
     'array' => 'The :attribute field must be an array.',
     'ascii' => 'The :attribute field must only contain single-byte alphanumeric characters and symbols.',
     'before' => 'The :attribute field must be a date before :date.',
-    'before_or_equal' => 'The :attribute field must be a date before or equal to :date.',
+    'before_or_equal' => 'TIDAK BOLEH LEBIH DARI TANGGAL SEKARANG',
     'between' => [
         'array' => 'The :attribute field must have between :min and :max items.',
         'file' => 'The :attribute field must be between :min and :max kilobytes.',
@@ -35,9 +35,9 @@ return [
     'can' => 'The :attribute field contains an unauthorized value.',
     'confirmed' => 'The :attribute field confirmation does not match.',
     'current_password' => 'The password is incorrect.',
-    'date' => 'The :attribute field must be a valid date.',
+    'date' => 'HARUS TANGGAL VALID',
     'date_equals' => 'The :attribute field must be a date equal to :date.',
-    'date_format' => ':attribute HARUS SESUAI FORMAT (:format)',
+    'date_format' => 'HARUS SESUAI FORMAT (:format)',
     'decimal' => 'The :attribute field must have :decimal decimal places.',
     'declined' => 'The :attribute field must be declined.',
     'declined_if' => 'The :attribute field must be declined when :other is :value.',
@@ -68,7 +68,7 @@ return [
     ],
     'image' => 'The :attribute field must be an image.',
     'id' => 'The selected :attribute is invalid.',
-    'in_array' => 'The :attribute field must exist id :other.',
+    'in_array' => ':attribute HARUS ADA DALAM DAFTAR BERIKUT :other',
     'integer' => 'The :attribute field must be an integer.',
     'ip' => 'The :attribute field must be a valid IP address.',
     'ipv4' => 'The :attribute field must be a valid IPv4 address.',
@@ -91,8 +91,8 @@ return [
     'max' => [
         'array' => 'The :attribute field must not have more than :max items.',
         'file' => 'The :attribute field must not be greater than :max kilobytes.',
-        'numeric' => 'The :attribute field must not be greater than :max.',
-        'string' => 'The :attribute field must not be greater than :max characters.',
+        'numeric' => 'TIDAK BOLEH LEBIH DARI :max',
+        'string' => 'TIDAK BOLEH LEBIH DARI :max KARAKTER',
     ],
     'max_digits' => 'The :attribute field must not have more than :max digits.',
     'mimes' => 'The :attribute field must be a file of type: :values.',
@@ -100,8 +100,8 @@ return [
     'min' => [
         'array' => 'The :attribute field must have at least :min items.',
         'file' => 'The :attribute field must be at least :min kilobytes.',
-        'numeric' => ':attribute MINIMAL HARUS 3 KARAKTER',
-        'string' => ':attribute MINIMAL HARUS 3 KARAKTER',
+        'numeric' => 'MINIMAL HARUS :min',
+        'string' => 'MINIMAL HARUS :min KARAKTER',
     ],
     'min_digits' => 'The :attribute field must have at least :min digits.',
     'missing' => 'The :attribute field must be missing.',
@@ -110,9 +110,9 @@ return [
     'missing_with' => 'The :attribute field must be missing when :values is present.',
     'missing_with_all' => 'The :attribute field must be missing when :values are present.',
     'multiple_of' => 'The :attribute field must be a multiple of :value.',
-    'not_in' => 'The selected :attribute is invalid.',
+    'not_in' => ':attribute TIDAK ADA DALAM DAFTAR :other',
     'not_regex' => 'The :attribute field format is invalid.',
-    'numeric' => ':attribute HARUS ANGKA',
+    'numeric' => 'HARUS ANGKA',
     'password' => [
         'letters' => 'The :attribute field must contain at least one letter.',
         'mixed' => 'The :attribute field must contain at least one uppercase and one lowercase letter.',
@@ -126,7 +126,7 @@ return [
     'prohibited_unless' => 'The :attribute field is prohibited unless :other is id :values.',
     'prohibits' => 'The :attribute field prohibits :other from being present.',
     'regex' => 'The :attribute field format is invalid.',
-    'required' => ':attribute TIDAK BOLEH KOSONG',
+    'required' => 'TIDAK BOLEH KOSONG',
     'required_array_keys' => 'The :attribute field must contain entries for: :values.',
     'required_if' => 'The :attribute field is required when :other is :value.',
     'required_if_accepted' => 'The :attribute field is required when :other is accepted.',
@@ -164,8 +164,8 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'kesadaran' => [
+            'in' => 'HARUS ADA DALAM DAFTAR BERIKUT: Compos Mentis, Somnolence, Sopor, Coma',
         ],
     ],
 

@@ -27,4 +27,9 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+//    protected function methodNotAllowed($request, MethodNotAllowedHttpException $exception) : JsonResponse
+//    {
+//        return response()->json(['message' => 'Custom Method Not Allowed Message'], 405);
+//    }
 }
