@@ -28,6 +28,17 @@ Route::middleware(\App\Http\Middleware\ApiAuthMiddleware::class)->group(function
     Route::controller(\App\Http\Controllers\PemeriksaanController::class)->group(function () {
         Route::post('/irj/pasien/{noRawat}/pemeriksaan', 'simpan');
 //        Route::post('/irj/pasien-rujukan/{noRawat}/pemeriksaan', 'simpan');
-        Route::get('/irj/pasien/{noRawat}/pemeriksaan/{tanggalRawat}/{jamRawat}', 'detail');
+        Route::get('/irj/pasien/{noRawat}/pemeriksaan/{tanggalRawat}/{jamRawat}', 'detail')->where([
+            'tanggalRawat' => '((((19|[2-9]\d)\d{2})\-(0[13578]|1[02])\-(0[1-9]|[12]\d|3[01]))|(((19|[2-9]\d)\d{2})\-(0[13456789]|1[012])\-(0[1-9]|[12]\d|30))|(((19|[2-9]\d)\d{2})\-02\-(0[1-9]|1\d|2[0-8]))|(((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))\-02\-29))+',
+            'jamRawat' => '(([0-1][0-9])|([2][0-3])):([0-5][0-9]):([0-5][0-9])+'
+        ]);
+        Route::put('/irj/pasien/{noRawat}/pemeriksaan/{tanggalRawat}/{jamRawat}', 'edit')->where([
+            'tanggalRawat' => '((((19|[2-9]\d)\d{2})\-(0[13578]|1[02])\-(0[1-9]|[12]\d|3[01]))|(((19|[2-9]\d)\d{2})\-(0[13456789]|1[012])\-(0[1-9]|[12]\d|30))|(((19|[2-9]\d)\d{2})\-02\-(0[1-9]|1\d|2[0-8]))|(((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))\-02\-29))+',
+            'jamRawat' => '(([0-1][0-9])|([2][0-3])):([0-5][0-9]):([0-5][0-9])+'
+        ]);
+        Route::delete('/irj/pasien/{noRawat}/pemeriksaan/{tanggalRawat}/{jamRawat}', 'hapus')->where([
+            'tanggalRawat' => '((((19|[2-9]\d)\d{2})\-(0[13578]|1[02])\-(0[1-9]|[12]\d|3[01]))|(((19|[2-9]\d)\d{2})\-(0[13456789]|1[012])\-(0[1-9]|[12]\d|30))|(((19|[2-9]\d)\d{2})\-02\-(0[1-9]|1\d|2[0-8]))|(((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))\-02\-29))+',
+            'jamRawat' => '(([0-1][0-9])|([2][0-3])):([0-5][0-9]):([0-5][0-9])+'
+        ]);
     });
 });

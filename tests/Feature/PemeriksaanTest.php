@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\PemeriksaanIrjModel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -78,6 +79,11 @@ class PemeriksaanTest extends TestCase
             )->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testSimpanPemeriksaanPasienSukses"]);
+        PemeriksaanIrjModel::query()
+            ->where("no_rawat", $response['data']['noRawat'])
+            ->where('tgl_perawatan', $response['data']['tanggalPerawatan'])
+            ->where('jam_rawat', $response['data']['jamPerawatan'])
+            ->delete();
     }
 
     public function testSimpanPemeriksaanPasienRujukanSukses()
@@ -140,6 +146,11 @@ class PemeriksaanTest extends TestCase
             )->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testSimpanPemeriksaanPasienRujukanSukses"]);
+        PemeriksaanIrjModel::query()
+            ->where("no_rawat", $response['data']['noRawat'])
+            ->where('tgl_perawatan', $response['data']['tanggalPerawatan'])
+            ->where('jam_rawat', $response['data']['jamPerawatan'])
+            ->delete();
     }
 
     public function testSimpanPemeriksaanPasienDuplikatPrimaryKey()
@@ -175,7 +186,7 @@ class PemeriksaanTest extends TestCase
             ->assertStatus(400)
             ->assertJson([
                 "error" => [
-                    "pesan"=> "PEMERIKSAAN PASIEN DENGAN NO. RAWAT 2023/11/14/000002 DAN WAKTU PERAWATAN 2023-11-30 14:11:11 SUDAH DIINPUTKAN"
+                    "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT 2023/11/14/000002 DAN WAKTU PERAWATAN 2023-11-30 14:11:11 SUDAH DIINPUTKAN"
                 ]
             ])->json();
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testSimpanPemeriksaanPasienDuplikatPrimaryKey"]);
@@ -214,10 +225,10 @@ class PemeriksaanTest extends TestCase
             ->assertStatus(404)
             ->assertJson([
                 "error" => [
-                    "pesan"=> "PASIEN DENGAN NO. RAWAT 2023/05/09/000139 TIDAK DITEMUKAN"
+                    "pesan" => "PASIEN DENGAN NO. RAWAT 2023/05/09/000139 TIDAK DITEMUKAN"
                 ]
             ])->json();
-        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testSimpanPemeriksaanPasienDuplikatPrimaryKey"]);
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testSimpanPemeriksaanPasienTidakDitemukan"]);
     }
 
     public function testSimpanPemeriksaanPasienTidakValid()
@@ -280,8 +291,8 @@ class PemeriksaanTest extends TestCase
                         "pemeriksaan" => "Sesak, batuk",
                         "penilaian" => "Nyeri akut",
                         "suhuTubuh" => 36,
-                        "beratBadan" => 60,
-                        "tinggiBadan" => 160,
+                        "beratBadan" => 70,
+                        "tinggiBadan" => 170,
                         "tensi" => "156/98",
                         "nadi" => 79,
                         "respirasi" => 20,
@@ -289,7 +300,7 @@ class PemeriksaanTest extends TestCase
                         "evaluasi" => "Kontrol, bila ada keluhan",
                         "kesadaran" => "Compos Mentis",
                         "alergi" => "Ibuprofen",
-                        "spo2" => 97,
+                        "spo2" => 99,
                         "gcs" => "4, 5, 6",
                         "tindakLanjut" => "Kaji respon nyeri",
                         "lingkarPerut" => 100
@@ -376,11 +387,11 @@ class PemeriksaanTest extends TestCase
         $response = $this->get(
             uri: '/api/irj/pasien/2023-11-14-000002/pemeriksaan/2023-11-3/14:1:11',
             headers: ['Authorization' => $login['data']['token']])
-            ->assertStatus(400)
+            ->assertStatus(404)
             ->assertJson(
                 [
                     "error" => [
-                        "pesan" => []
+                        "pesan" => 'URL TIDAK DITEMUKAN'
                     ]
                 ]
             )->json();
@@ -403,6 +414,299 @@ class PemeriksaanTest extends TestCase
             )->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testDetailPemeriksaanPasienUnauthorized"]);
+    }
+
+    public function testEditPemeriksaanPasienSukses()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+        $response = $this->put(
+            uri: '/api/irj/pasien/2023-11-14-000002/pemeriksaan/2023-12-01/09:00:00',
+            data: [
+                "tanggalPerawatan" => "2023-12-01",
+                "jamPerawatan" => "09:00:00",
+                "keluhan" => "Nyeri dada",
+                "pemeriksaan" => "Sesak, batuk edit",
+                "penilaian" => "Nyeri akut edit",
+                "suhuTubuh" => 36,
+                "beratBadan" => 70,
+                "tinggiBadan" => 170,
+                "tensi" => "156/98",
+                "nadi" => 79,
+                "respirasi" => 20,
+                "instruksi" => "Terapi 2X seminggu",
+                "evaluasi" => "Kontrol, bila ada keluhan",
+                "kesadaran" => "Compos Mentis",
+                "alergi" => "Ibuprofen edit",
+                "spo2" => 99,
+                "gcs" => "4, 5, 6",
+                "tindakLanjut" => "Kaji respon nyeri",
+                "lingkarPerut" => 100
+            ],
+            headers: ['Authorization' => $login['data']['token']])
+            ->assertStatus(200)
+            ->assertJson(
+                [
+                    "data" => [
+                        "noRawat" => "2023/11/14/000002",
+                        "tanggalPerawatan" => "2023-12-01",
+                        "jamPerawatan" => "09:00:00",
+                        "idPemeriksa" => "TEST",
+                        "namaPemeriksa" => "TEST",
+                        "keluhan" => "Nyeri dada",
+                        "pemeriksaan" => "Sesak, batuk edit",
+                        "penilaian" => "Nyeri akut edit",
+                        "suhuTubuh" => 36,
+                        "beratBadan" => 70,
+                        "tinggiBadan" => 170,
+                        "tensi" => "156/98",
+                        "nadi" => 79,
+                        "respirasi" => 20,
+                        "instruksi" => "Terapi 2X seminggu",
+                        "evaluasi" => "Kontrol, bila ada keluhan",
+                        "kesadaran" => "Compos Mentis",
+                        "alergi" => "Ibuprofen edit",
+                        "spo2" => 99,
+                        "gcs" => "4, 5, 6",
+                        "tindakLanjut" => "Kaji respon nyeri",
+                        "lingkarPerut" => 100
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testEditPemeriksaanPasienSukses"]);
+    }
+
+    public function testEditPemeriksaanPasienDuplikatPrimaryKey()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+        $response = $this->put(
+            uri: '/api/irj/pasien/2023-11-14-000002/pemeriksaan/2023-12-01/09:00:00',
+            data: [
+                "tanggalPerawatan" => "2023-11-30",
+                "jamPerawatan" => "14:11:11",
+                "keluhan" => "Nyeri dada edit",
+                "pemeriksaan" => "Sesak, batuk edit",
+                "penilaian" => "Nyeri akut edit",
+                "suhuTubuh" => 36,
+                "beratBadan" => 70,
+                "tinggiBadan" => 170,
+                "tensi" => "156/98",
+                "nadi" => 79,
+                "respirasi" => 20,
+                "instruksi" => "Terapi 2X seminggu",
+                "evaluasi" => "Kontrol, bila ada keluhan",
+                "kesadaran" => "Compos Mentis",
+                "alergi" => "Ibuprofen edit",
+                "spo2" => 99,
+                "gcs" => "4, 5, 6",
+                "tindakLanjut" => "Kaji respon nyeri",
+                "lingkarPerut" => 100
+            ],
+            headers: ['Authorization' => $login['data']['token']])
+            ->assertStatus(400)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT 2023/11/14/000002 DAN WAKTU PERAWATAN 2023-11-30 14:11:11 SUDAH DIINPUTKAN"
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testEditPemeriksaanPasienDuplikatPrimaryKey"]);
+    }
+
+    public function testEditPemeriksaanPasienTidakValid()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+        $response = $this->put(
+            uri: '/api/irj/pasien/2023-11-14-000002/pemeriksaan/2023-12-01/09:00:00',
+            data: [
+                "tanggalPerawatan" => "2023-12",
+                "jamPerawatan" => "17:05:12",
+                "keluhan" => "Nyeri dada",
+                "pemeriksaan" => "Sesak, batuk",
+                "penilaian" => "",
+                "suhuTubuh" => "tiga enam",
+                "beratBadan" => "60",
+                "tinggiBadan" => "160",
+                "tensi" => "156/98",
+                "nadi" => 79,
+                "respirasi" => 20,
+                "instruksi" => "Terapi 2X seminggu",
+                "evaluasi" => "Kontrol, bila ada keluhan",
+                "kesadaran" => "ComposMentis",
+                "alergi" => "Ibuprofen",
+                "spo2" => 97,
+                "gcs" => "4, 5, 6",
+                "lingkarPerut" => "Kaji respon nyeri",
+            ],
+            headers: ['Authorization' => $login['data']['token']])
+            ->assertStatus(400)
+            ->assertJson([
+                "error" => [
+                ]
+            ])->json();
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testEditPemeriksaanPasienTidakValid"]);
+    }
+
+    public function testEditPemeriksaanTidakDitemukan()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+        $response = $this->put(
+            uri: '/api/irj/pasien/2023-11-14-000002/pemeriksaan/2023-12-01/09:30:00',
+            data: [
+                "tanggalPerawatan" => "2023-12-01",
+                "jamPerawatan" => "10:00:00",
+                "keluhan" => "Nyeri dada edit",
+                "pemeriksaan" => "Sesak, batuk edit",
+                "penilaian" => "Nyeri akut edit",
+                "suhuTubuh" => 36,
+                "beratBadan" => 70,
+                "tinggiBadan" => 170,
+                "tensi" => "156/98",
+                "nadi" => 79,
+                "respirasi" => 20,
+                "instruksi" => "Terapi 2X seminggu",
+                "evaluasi" => "Kontrol, bila ada keluhan",
+                "kesadaran" => "Compos Mentis",
+                "alergi" => "Ibuprofen edit",
+                "spo2" => 99,
+                "gcs" => "4, 5, 6",
+                "tindakLanjut" => "Kaji respon nyeri",
+                "lingkarPerut" => 100
+            ],
+            headers: ['Authorization' => $login['data']['token']])
+            ->assertStatus(404)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT 2023/11/14/000002 DAN WAKTU PERAWATAN 2023-12-01 09:30:00 TIDAK DITEMUKAN"
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testEditPemeriksaanTidakDitemukan"]);
+    }
+
+    public function testEditPemeriksaanPasienDokterLain()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+        $response = $this->put(
+            uri: '/api/irj/pasien/2023-10-27-000002/pemeriksaan/2023-12-05/14:22:53',
+            data: [
+                "tanggalPerawatan" => "2023-12-05",
+                "jamPerawatan" => "09:00:00",
+                "keluhan" => "Nyeri dada edit lagi",
+                "pemeriksaan" => "Sesak, batuk edit lagi",
+                "penilaian" => "Nyeri akut edit lagi",
+                "suhuTubuh" => 36,
+                "beratBadan" => 70,
+                "tinggiBadan" => 170,
+                "tensi" => "156/98",
+                "nadi" => 79,
+                "respirasi" => 20,
+                "instruksi" => "Terapi 2X seminggu",
+                "evaluasi" => "Kontrol, bila ada keluhan",
+                "kesadaran" => "Compos Mentis",
+                "alergi" => "Ibuprofen edit",
+                "spo2" => 99,
+                "gcs" => "4, 5, 6",
+                "tindakLanjut" => "Kaji respon nyeri",
+                "lingkarPerut" => 100
+            ],
+            headers: ['Authorization' => $login['data']['token']])
+            ->assertStatus(401)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => "PEMERIKSAAN PASIEN HANYA DAPAT DIEDIT OLEH PEMERIKSA"
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testEditPemeriksaanPasienDokterLain"]);
+    }
+
+    public function testHapusPemeriksaanPasienSukses()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+        $waktuSekarang = strtotime(Carbon::now());
+        $post = $this->post(
+            uri: '/api/irj/pasien/2023-11-14-000002/pemeriksaan',
+            data: [
+                "tanggalPerawatan" => date('Y-m-d', $waktuSekarang),
+                "jamPerawatan" => date('H:i:s', $waktuSekarang),
+                "keluhan" => "Nyeri dada",
+                "pemeriksaan" => "Sesak, batuk",
+                "penilaian" => "Nyeri akut",
+                "suhuTubuh" => 36,
+                "beratBadan" => 60,
+                "tinggiBadan" => 160,
+                "tensi" => "156/98",
+                "nadi" => 79,
+                "respirasi" => 20,
+                "instruksi" => "Terapi 2X seminggu",
+                "evaluasi" => "Kontrol, bila ada keluhan",
+                "kesadaran" => "Compos Mentis",
+                "alergi" => "Ibuprofen",
+                "spo2" => 97,
+                "gcs" => "4, 5, 6",
+                "tindakLanjut" => "Kaji respon nyeri",
+                "lingkarPerut" => 100
+            ],
+            headers: ['Authorization' => $login['data']['token']])->json();
+
+        $response = $this->delete(
+            uri: '/api/irj/pasien/2023-11-14-000002/pemeriksaan/' . $post['data']['tanggalPerawatan'] . '/' . $post['data']['jamPerawatan'],
+            headers: ['Authorization' => $login['data']['token']])
+            ->assertStatus(200)
+            ->assertJson([
+                "data" => [
+                    "pesan" => "PEMERIKSAAN DIHAPUS"
+                ]
+            ])->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testHapusPemeriksaanPasienSukses"]);
+
+    }
+
+    public function testHapusPemeriksaanPasienDokterLain()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+        $response = $this->delete(
+            uri: '/api/irj/pasien/2023-10-27-000002/pemeriksaan/2023-12-05/14:22:53',
+            headers: ['Authorization' => $login['data']['token']])
+            ->assertStatus(401)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => "PEMERIKSAAN PASIEN HANYA DAPAT DIHAPUS OLEH PEMERIKSA"
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testHapusPemeriksaanPasienDokterLain"]);
     }
 
 

@@ -8,8 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PemeriksaanIrjModel extends Model
 {
+    /**
+     * @var array|mixed|string|string[]
+     */
     protected $table = "pemeriksaan_ralan";
     protected $primaryKey = ['no_rawat', 'tgl_perawatan', 'jam_rawat'];
+
+    protected $keyType = 'string';
     public $incrementing = false;
     public $timestamps = false;
     protected $fillable = ["no_rawat","tgl_perawatan","jam_rawat","suhu_tubuh","tensi","nadi","respirasi","tinggi","berat","spo2","gcs","kesadaran","keluhan","pemeriksaan","alergi","lingkar_perut","rtl","penilaian","instruksi","evaluasi","nip"];
