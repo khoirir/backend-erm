@@ -2,12 +2,11 @@
 
 namespace App\Exceptions;
 
+use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Throwable;
 
 class Handler extends ExceptionHandler
 {
@@ -22,27 +21,37 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
-    /**
-     * Register the exception handling callbacks for the application.
-     */
     public function register(): void
     {
-//        $this->reportable(function (Throwable $e) {
-//            //
-//        });
-        $this->renderable(function (NotFoundHttpException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return response()->json([
-                    'error' => [
-                        'pesan' => 'URL TIDAK DITEMUKAN'
-                    ]
-                ], 404);
+        $this->renderable(function (Exception $e, Request $request) {
+            if ($e instanceof NotFoundHttpException) {
+                return $this->handleNotFound($request);
+            }
+            if ($e instanceof MethodNotAllowedHttpException) {
+                return $this->handleMethodNotAllowed($request);
             }
         });
     }
 
-//    protected function methodNotAllowed($request, MethodNotAllowedHttpException $exception) : JsonResponse
-//    {
-//        return response()->json(['message' => 'Custom Method Not Allowed Message'], 405);
-//    }
+    protected function handleNotFound(Request $request)
+    {
+        if ($request->is('api/*')) {
+            return response()->json([
+                'error' => [
+                    'pesan' => 'URL TIDAK DITEMUKAN'
+                ]
+            ], 404);
+        }
+    }
+
+    protected function handleMethodNotAllowed(Request $request)
+    {
+        if ($request->is('api/*')) {
+            return response()->json([
+                'error' => [
+                    'pesan' => 'METHOD TIDAK DIIZINKAN'
+                ]
+            ], 405);
+        }
+    }
 }

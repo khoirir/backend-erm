@@ -76,7 +76,8 @@ class PemeriksaanTest extends TestCase
                         "lingkarPerut" => 100
                     ]
                 ]
-            )->json();
+            )
+            ->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testSimpanPemeriksaanPasienSukses"]);
         PemeriksaanIrjModel::query()
@@ -427,7 +428,7 @@ class PemeriksaanTest extends TestCase
             data: [
                 "tanggalPerawatan" => "2023-12-01",
                 "jamPerawatan" => "09:00:00",
-                "keluhan" => "Nyeri dada",
+                "keluhan" => "Nyeri dada edit",
                 "pemeriksaan" => "Sesak, batuk edit",
                 "penilaian" => "Nyeri akut edit",
                 "suhuTubuh" => 36,
@@ -436,13 +437,13 @@ class PemeriksaanTest extends TestCase
                 "tensi" => "156/98",
                 "nadi" => 79,
                 "respirasi" => 20,
-                "instruksi" => "Terapi 2X seminggu",
-                "evaluasi" => "Kontrol, bila ada keluhan",
+                "instruksi" => "Terapi 2X seminggu edit",
+                "evaluasi" => "Kontrol, bila ada keluhan edit",
                 "kesadaran" => "Compos Mentis",
                 "alergi" => "Ibuprofen edit",
                 "spo2" => 99,
                 "gcs" => "4, 5, 6",
-                "tindakLanjut" => "Kaji respon nyeri",
+                "tindakLanjut" => "Kaji respon nyeri edit",
                 "lingkarPerut" => 100
             ],
             headers: ['Authorization' => $login['data']['token']])
@@ -455,7 +456,7 @@ class PemeriksaanTest extends TestCase
                         "jamPerawatan" => "09:00:00",
                         "idPemeriksa" => "TEST",
                         "namaPemeriksa" => "TEST",
-                        "keluhan" => "Nyeri dada",
+                        "keluhan" => "Nyeri dada edit",
                         "pemeriksaan" => "Sesak, batuk edit",
                         "penilaian" => "Nyeri akut edit",
                         "suhuTubuh" => 36,
@@ -464,13 +465,13 @@ class PemeriksaanTest extends TestCase
                         "tensi" => "156/98",
                         "nadi" => 79,
                         "respirasi" => 20,
-                        "instruksi" => "Terapi 2X seminggu",
-                        "evaluasi" => "Kontrol, bila ada keluhan",
+                        "instruksi" => "Terapi 2X seminggu edit",
+                        "evaluasi" => "Kontrol, bila ada keluhan edit",
                         "kesadaran" => "Compos Mentis",
                         "alergi" => "Ibuprofen edit",
                         "spo2" => 99,
                         "gcs" => "4, 5, 6",
-                        "tindakLanjut" => "Kaji respon nyeri",
+                        "tindakLanjut" => "Kaji respon nyeri edit",
                         "lingkarPerut" => 100
                     ]
                 ]
@@ -707,6 +708,141 @@ class PemeriksaanTest extends TestCase
             )->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testHapusPemeriksaanPasienDokterLain"]);
+    }
+
+    public function testListPemeriksaanPasien()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien/00164660/pemeriksaan', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPemeriksaanPasien"]);
+        self::assertCount(1, $response['data']);
+    }
+
+    public function testListPemeriksaanPasienBerdasarkanTanggal()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(
+            uri: '/api/irj/pasien/00153605/pemeriksaan?tanggalAwal=2023-11-30&tanggalAkhir='.date('Y-m-d', strtotime(Carbon::now())),
+            headers: [
+                'Authorization' => $login['data']['token']
+            ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPemeriksaanPasienBerdasarkanTanggal"]);
+        self::assertCount(4, $response['data']);
+        self::assertEquals(4, $response['meta']['total']);
+    }
+
+    public function testListPememriksaanPasienBerdasarkanTanggalFormatTidakValid()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien/00153605/pemeriksaan?tanggalAwal=14-11-2029&tanggalAkhir=yuig-rt-hh', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(400)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => []
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPememriksaanPasienBerdasarkanTanggalFormatTidakValid"]);
+    }
+
+    public function testListPemeriksaanPasienBerdasarkanLimit()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien/00153605/pemeriksaan?limit=1&halaman=2', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPemeriksaanPasienBerdasarkanLimit"]);
+        self::assertCount(1, $response['data']);
+        self::assertEquals(2, $response['meta']['halaman']);
+        self::assertEquals(1, $response['meta']['limit']);
+    }
+
+    public function testListPemeriksaanPasienBerdasarkanLimitTidakValid()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien/00153605/pemeriksaan?limit=yu&halaman=iki', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(400)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => []
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPemeriksaanPasienBerdasarkanLimitTidakValid"]);
+    }
+
+    public function testPencarianPemeriksaanPasien()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(uri: '/api/irj/pasien/00153605/pemeriksaan?tanggalAwal=2023-11-30&tanggalAkhir='.date('Y-m-d', strtotime(Carbon::now())).'&pencarian=nyeri%20dada', headers: [
+            'Authorization' => $login['data']['token']
+        ])->assertStatus(200)
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPemeriksaanPasien"]);
+
+        self::assertCount(4, $response['data']);
+        self::assertEquals(4, $response['meta']['total']);
+    }
+
+    public function testListPemeriksaanPasienParameterTidakValid()
+    {
+        $login = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->json();
+
+        $response = $this->get(
+            uri: '/api/irj/pasien/2023-11-14-000002/pemeriksaan',
+            headers: ['Authorization' => $login['data']['token']])
+            ->assertStatus(405)
+            ->assertJson(
+                [
+                    "error" => [
+                        "pesan" => 'METHOD TIDAK DIIZINKAN'
+                    ]
+                ]
+            )->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testListPemeriksaanPasienParameterTidakValid"]);
     }
 
 

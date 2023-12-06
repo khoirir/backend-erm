@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,7 +13,6 @@ class PemeriksaanIrjModel extends Model
      */
     protected $table = "pemeriksaan_ralan";
     protected $primaryKey = ['no_rawat', 'tgl_perawatan', 'jam_rawat'];
-
     protected $keyType = 'string';
     public $incrementing = false;
     public $timestamps = false;
@@ -25,5 +24,28 @@ class PemeriksaanIrjModel extends Model
 
     public function dokter(): BelongsTo {
         return $this->belongsTo(DokterModel::class, 'nip', 'kd_dokter');
+    }
+
+    protected function getKeyForSaveQuery()
+    {
+
+        $primaryKeyForSaveQuery = array(count($this->primaryKey));
+
+        foreach ($this->primaryKey as $i => $pKey) {
+            $primaryKeyForSaveQuery[$i] = $this->original[$this->getKeyName()[$i]] ?? $this->getAttribute($this->getKeyName()[$i]);
+        }
+
+        return $primaryKeyForSaveQuery;
+
+    }
+
+    protected function setKeysForSaveQuery($query): Builder
+    {
+
+        foreach ($this->primaryKey as $i => $pKey) {
+            $query->where($this->getKeyName()[$i], '=', $this->getKeyForSaveQuery()[$i]);
+        }
+
+        return $query;
     }
 }

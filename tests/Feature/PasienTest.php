@@ -9,9 +9,6 @@ use Tests\TestCase;
 
 class PasienTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
     public function setUp(): void
     {
         parent::setUp();

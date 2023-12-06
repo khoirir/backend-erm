@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\InputParameterRequest;
 use App\Http\Requests\PemeriksaanRequest;
 use App\Http\Requests\RawatParameterRequest;
+use App\Http\Resources\PemeriksaanCollection;
 use App\Http\Resources\PemeriksaanResource;
 use App\Models\PasienModel;
 use App\Models\PemeriksaanIrjModel;
 use App\Models\RegistrasiModel;
 use App\Models\RujukanInternalModel;
 use App\Models\UserModel;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -31,11 +34,13 @@ class PemeriksaanController extends Controller
                 ->where('no_rawat', $noRawat)
                 ->where('kd_dokter', $userModel->kd_dokter)
                 ->first();
-            if (!$rujukanPasien) throw new HttpResponseException(response([
-                "error" => [
-                    "pesan" => "PASIEN DENGAN NO. RAWAT " . $noRawat . " TIDAK DITEMUKAN"
-                ]
-            ], 404));
+            if (!$rujukanPasien) {
+                throw new HttpResponseException(response([
+                    "error" => [
+                        "pesan" => "PASIEN DENGAN NO. RAWAT " . $noRawat . " TIDAK DITEMUKAN"
+                    ]
+                ], 404));
+            }
         }
     }
 
@@ -47,7 +52,26 @@ class PemeriksaanController extends Controller
             ->where('jam_rawat', $jamRawat);
     }
 
-    private function transformRequestData(array $data, UserModel $userModel): array
+    private function getPemeriksaanIrjPasien(string $noRawat, string $tanggalRawat, string $jamRawat): PemeriksaanIrjModel
+    {
+        $pemeriksaanIrjPasien = PemeriksaanIrjModel::where('no_rawat', $noRawat)
+            ->where('tgl_perawatan', $tanggalRawat)
+            ->where('jam_rawat', $jamRawat)
+            ->first();
+
+        if (!$pemeriksaanIrjPasien) {
+            throw new HttpResponseException(response([
+                "error" => [
+                    "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT " . $noRawat . " DAN WAKTU PERAWATAN "
+                        . $tanggalRawat . " " . $jamRawat . " TIDAK DITEMUKAN"
+                ]
+            ], 404));
+        }
+
+        return $pemeriksaanIrjPasien;
+    }
+
+    private function transformRequestData(array $data): array
     {
         return [
             "tgl_perawatan" => $data['tanggalPerawatan'],
@@ -68,8 +92,7 @@ class PemeriksaanController extends Controller
             "rtl" => $data['tindakLanjut'],
             "penilaian" => $data['penilaian'],
             "instruksi" => $data['instruksi'],
-            "evaluasi" => $data['evaluasi'],
-            "nip" => $userModel->kd_dokter
+            "evaluasi" => $data['evaluasi']
         ];
     }
 
@@ -83,19 +106,18 @@ class PemeriksaanController extends Controller
 
         $this->getRegistrasiPasien($noRawat, $user);
 
-        if ($this->builderPemeriksaanIrjPasien(
-                $noRawat,
-                $tanggalPerawatan,
-                $jamPerawatan
-            )->count() == 1) throw new HttpResponseException(response([
-            "error" => [
-                "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT " . $noRawat . " DAN WAKTU PERAWATAN "
-                    . $tanggalPerawatan . " " . $jamPerawatan . " SUDAH DIINPUTKAN"
-            ]
-        ], 400));
+        if ($this->builderPemeriksaanIrjPasien($noRawat, $tanggalPerawatan, $jamPerawatan)->count() == 1) {
+            throw new HttpResponseException(response([
+                "error" => [
+                    "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT " . $noRawat . " DAN WAKTU PERAWATAN "
+                        . $tanggalPerawatan . " " . $jamPerawatan . " SUDAH DIINPUTKAN"
+                ]
+            ], 400));
+        }
 
-        $pemeriksaanIrjPasien = new PemeriksaanIrjModel($this->transformRequestData($data, $user));
+        $pemeriksaanIrjPasien = new PemeriksaanIrjModel($this->transformRequestData($data));
         $pemeriksaanIrjPasien->no_rawat = $noRawat;
+        $pemeriksaanIrjPasien->nip = $user->kd_dokter;
         $pemeriksaanIrjPasien->save();
 
         return new PemeriksaanResource($pemeriksaanIrjPasien);
@@ -108,13 +130,7 @@ class PemeriksaanController extends Controller
 
         $this->getRegistrasiPasien($noRawat, $user);
 
-        $pemeriksaanIrjPasien = $this->builderPemeriksaanIrjPasien($noRawat, $tanggalRawat, $jamRawat)->first();
-        if (!$pemeriksaanIrjPasien) throw new HttpResponseException(response([
-            "error" => [
-                "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT " . $noRawat . " DAN WAKTU PERAWATAN "
-                    . $tanggalRawat . " " . $jamRawat . " TIDAK DITEMUKAN"
-            ]
-        ], 404));
+        $pemeriksaanIrjPasien = $this->getPemeriksaanIrjPasien($noRawat, $tanggalRawat, $jamRawat);
 
         return new PemeriksaanResource($pemeriksaanIrjPasien);
     }
@@ -129,26 +145,19 @@ class PemeriksaanController extends Controller
 
         $this->getRegistrasiPasien($noRawat, $user);
 
-        $pemeriksaanIrjPasien = $this->builderPemeriksaanIrjPasien($noRawat, $tanggalRawat, $jamRawat)->first();
-        if (!$pemeriksaanIrjPasien) throw new HttpResponseException(response([
-            "error" => [
-                "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT " . $noRawat . " DAN WAKTU PERAWATAN "
-                    . $tanggalRawat . " " . $jamRawat . " TIDAK DITEMUKAN"
-            ]
-        ], 404));
+        $pemeriksaanIrjPasien = $this->getPemeriksaanIrjPasien($noRawat, $tanggalRawat, $jamRawat);
 
-        if ($pemeriksaanIrjPasien['nip'] !== $user->kd_dokter) throw new HttpResponseException(response([
-            "error" => [
-                "pesan" => "PEMERIKSAAN PASIEN HANYA DAPAT DIEDIT OLEH PEMERIKSA"
-            ]
-        ], 401));
+        if ($pemeriksaanIrjPasien['nip'] !== $user->kd_dokter) {
+            throw new HttpResponseException(response([
+                "error" => [
+                    "pesan" => "PEMERIKSAAN PASIEN HANYA DAPAT DIEDIT OLEH PEMERIKSA"
+                ]
+            ], 401));
+        }
 
-        if ($tanggalPerawatan . $jamPerawatan !== $pemeriksaanIrjPasien['tgl_perawatan'] . $pemeriksaanIrjPasien['jam_rawat']) {
-            if ($this->builderPemeriksaanIrjPasien(
-                    $noRawat,
-                    $tanggalPerawatan,
-                    $jamPerawatan
-                )->count() == 1) throw new HttpResponseException(response([
+        if ($tanggalPerawatan . $jamPerawatan !== $pemeriksaanIrjPasien['tgl_perawatan'] . $pemeriksaanIrjPasien['jam_rawat']
+            && $this->builderPemeriksaanIrjPasien($noRawat, $tanggalPerawatan, $jamPerawatan)->count() == 1) {
+            throw new HttpResponseException(response([
                 "error" => [
                     "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT " . $noRawat . " DAN WAKTU PERAWATAN "
                         . $tanggalPerawatan . " " . $jamPerawatan . " SUDAH DIINPUTKAN"
@@ -156,9 +165,8 @@ class PemeriksaanController extends Controller
             ], 400));
         }
 
-        $this->builderPemeriksaanIrjPasien($noRawat, $tanggalRawat, $jamRawat)->update($this->transformRequestData($data, $user));
-
-        $pemeriksaanIrjPasien = $this->builderPemeriksaanIrjPasien($noRawat, $tanggalPerawatan, $jamPerawatan)->first();
+        $pemeriksaanIrjPasien->fill($this->transformRequestData($data));
+        $pemeriksaanIrjPasien->save();
 
         return new PemeriksaanResource($pemeriksaanIrjPasien);
     }
@@ -170,26 +178,60 @@ class PemeriksaanController extends Controller
 
         $this->getRegistrasiPasien($noRawat, $user);
 
-        $pemeriksaanIrjPasien = $this->builderPemeriksaanIrjPasien($noRawat, $tanggalRawat, $jamRawat)->first();
-        if (!$pemeriksaanIrjPasien) throw new HttpResponseException(response([
-            "error" => [
-                "pesan" => "PEMERIKSAAN PASIEN DENGAN NO. RAWAT " . $noRawat . " DAN WAKTU PERAWATAN "
-                    . $tanggalRawat . " " . $jamRawat . " TIDAK DITEMUKAN"
-            ]
-        ], 404));
+        $pemeriksaanIrjPasien = $this->getPemeriksaanIrjPasien($noRawat, $tanggalRawat, $jamRawat);
 
-        if ($pemeriksaanIrjPasien['nip'] !== $user->kd_dokter) throw new HttpResponseException(response([
-            "error" => [
-                "pesan" => "PEMERIKSAAN PASIEN HANYA DAPAT DIHAPUS OLEH PEMERIKSA"
-            ]
-        ], 401));
+        if ($pemeriksaanIrjPasien['nip'] !== $user->kd_dokter) {
+            throw new HttpResponseException(response([
+                "error" => [
+                    "pesan" => "PEMERIKSAAN PASIEN HANYA DAPAT DIHAPUS OLEH PEMERIKSA"
+                ]
+            ], 401));
+        }
 
-        $this->builderPemeriksaanIrjPasien($noRawat, $tanggalRawat, $jamRawat)->delete();
+        $pemeriksaanIrjPasien->delete();
 
         return response()->json([
             "data" => [
                 "pesan" => "PEMERIKSAAN DIHAPUS"
             ]
         ])->setStatusCode(200);
+    }
+
+    public function listData(string $noRM, InputParameterRequest $request): PemeriksaanCollection
+    {
+        $data = $request->validated();
+        $tanggalAwal = $data['tanggalAwal'] ?? date('Y-m-d', strtotime(Carbon::now()));
+        $tanggalAkhir = $data['tanggalAkhir'] ?? date('Y-m-d', strtotime(Carbon::now()));
+        $halaman = $data['halaman'] ?? 1;
+        $limit = $data['limit'] ?? 10;
+
+        $pemeriksaanIrjPasien = PemeriksaanIrjModel::with(['registrasi', 'dokter', 'dokter.pegawai'])
+            ->whereRelation('registrasi', 'no_rkm_medis', $noRM)
+            ->where('tgl_perawatan', '>=', $tanggalAwal)
+            ->where('tgl_perawatan', '<=', $tanggalAkhir);
+
+        $pencarian = $request->input('pencarian');
+        if ($pencarian) {
+            $pemeriksaanIrjPasien = $pemeriksaanIrjPasien->where(function (Builder $builder) use ($pencarian) {
+                $builder->orWhere('no_rawat', 'like', '%' . $pencarian . '%');
+                $builder->orWhere('keluhan', 'like', '%' . $pencarian . '%');
+                $builder->orWhere('pemeriksaan', 'like', '%' . $pencarian . '%');
+                $builder->orWhere('penilaian', 'like', '%' . $pencarian . '%');
+                $builder->orWhere('instruksi', 'like', '%' . $pencarian . '%');
+                $builder->orWhere('evaluasi', 'like', '%' . $pencarian . '%');
+                $builder->orWhere('kesadaran', 'like', '%' . $pencarian . '%');
+                $builder->orWhere('alergi', 'like', '%' . $pencarian . '%');
+                $builder->orWhere('rtl', 'like', '%' . $pencarian . '%');
+                $builder->orWhereHas('dokter', function (Builder $builder) use ($pencarian) {
+                    $builder->where('nm_dokter', 'like', '%' . $pencarian . '%');
+                });
+            });
+        }
+
+        $pemeriksaanIrjPasien = $pemeriksaanIrjPasien->orderBy('tgl_perawatan', 'ASC')
+            ->orderBy('jam_rawat', 'ASC')
+            ->paginate(perPage: $limit, page: $halaman);
+
+        return new PemeriksaanCollection($pemeriksaanIrjPasien);
     }
 }

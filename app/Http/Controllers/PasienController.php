@@ -27,7 +27,7 @@ class PasienController extends Controller
         if (!$pasien) {
             throw new HttpResponseException(response([
                 "error" => [
-                    "pesan" => "PASIEN DENGAN NO. RAWAT ".$noRawat." TIDAK DITEMUKAN"
+                    "pesan" => "PASIEN DENGAN NO. RAWAT " . $noRawat . " TIDAK DITEMUKAN"
                 ]
             ], 404));
         }
@@ -43,7 +43,7 @@ class PasienController extends Controller
         $halaman = $data['halaman'] ?? 1;
         $limit = $data['limit'] ?? 10;
 
-        $pasien = RegistrasiModel::with(['dokter','pasien','rujukanInternal','poli'])
+        $pasien = RegistrasiModel::with(['dokter', 'pasien', 'rujukanInternal', 'poli'])
             ->where('kd_dokter', $user->kd_dokter)
             ->where('tgl_registrasi', '>=', $tanggalAwal)
             ->where('tgl_registrasi', '<=', $tanggalAkhir)
@@ -54,7 +54,9 @@ class PasienController extends Controller
             $pasien = $this->builderPencarian($pasien, $pencarian);
         }
 
-        $pasien = $pasien->paginate(perPage: $limit, page: $halaman);
+        $pasien = $pasien->orderBy('tgl_registrasi', 'ASC')
+            ->orderBy('jam_reg', 'ASC')
+            ->paginate(perPage: $limit, page: $halaman);
 
         return new PasienColletion($pasien);
     }
@@ -71,7 +73,7 @@ class PasienController extends Controller
         if (!$rujukan) {
             throw new HttpResponseException(response([
                 "error" => [
-                    "pesan" => "PASIEN RUJUKAN DENGAN NO. RAWAT ".$noRawat." TIDAK DITEMUKAN"
+                    "pesan" => "PASIEN RUJUKAN DENGAN NO. RAWAT " . $noRawat . " TIDAK DITEMUKAN"
                 ]
             ], 404));
         }
@@ -88,10 +90,8 @@ class PasienController extends Controller
         $halaman = $data['halaman'] ?? 1;
         $limit = $data['limit'] ?? 10;
 
-        $pasien = RegistrasiModel::with(['dokter','pasien','rujukanInternal','poli'])
-            ->whereHas('rujukanInternal', function (Builder $builder) use ($user) {
-                $builder->where('kd_dokter', $user->kd_dokter);
-            })
+        $pasien = RegistrasiModel::with(['dokter', 'pasien', 'rujukanInternal', 'poli'])
+            ->whereRelation('rujukanInternal', 'kd_dokter', $user->kd_dokter)
             ->where('tgl_registrasi', '>=', $tanggalAwal)
             ->where('tgl_registrasi', '<=', $tanggalAkhir)
             ->where('stts', '!=', 'Batal');
@@ -101,12 +101,15 @@ class PasienController extends Controller
             $pasien = $this->builderPencarian($pasien, $pencarian);
         }
 
-        $pasien = $pasien->paginate(perPage: $limit, page: $halaman);
+        $pasien = $pasien->orderBy('tgl_registrasi', 'ASC')
+            ->orderBy('jam_reg', 'ASC')
+            ->paginate(perPage: $limit, page: $halaman);
 
         return new PasienColletion($pasien);
     }
 
-    private function builderPencarian(Builder $pasien, string $pencarian):Builder {
+    private function builderPencarian(Builder $pasien, string $pencarian): Builder
+    {
         $pasien->where(function (Builder $builder) use ($pencarian) {
             $builder->orWhere('no_rkm_medis', 'like', '%' . $pencarian . '%');
             $builder->orWhere('no_rawat', 'like', '%' . $pencarian . '%');
@@ -114,7 +117,7 @@ class PasienController extends Controller
                 $builder->where('nm_pasien', 'like', '%' . $pencarian . '%');
                 $builder->orWhere('alamat', 'like', '%' . $pencarian . '%');
             });
-        })->orderBy('tgl_registrasi')->orderBy('jam_reg');
+        });
 
         return $pasien;
     }
