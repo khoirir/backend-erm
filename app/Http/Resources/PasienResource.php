@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
-use mysql_xdevapi\CollectionFind;
 
 class PasienResource extends JsonResource
 {
@@ -24,7 +23,7 @@ class PasienResource extends JsonResource
             "tanggalRegistrasi" => $this->tgl_registrasi,
             "jamRegistrasi" => $this->jam_reg,
             "poliAsal" => $this->when(count($this->rujukanInternal->where('kd_dokter', Auth::user()->kd_dokter)) > 0, function () {
-                return $this->poli->nm_poli;
+                return $this->poliklinik->nm_poli;
             }),
             "dokterAsal" => $this->when(count($this->rujukanInternal->where('kd_dokter', Auth::user()->kd_dokter)) > 0, function () {
                 return $this->dokter->nm_dokter;

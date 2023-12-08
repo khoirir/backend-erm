@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;

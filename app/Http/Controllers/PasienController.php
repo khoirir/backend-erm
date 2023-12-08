@@ -5,13 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\InputParameterRequest;
 use App\Http\Resources\PasienColletion;
 use App\Http\Resources\PasienResource;
-use App\Models\RegistrasiModel;
-use App\Models\RujukanInternalModel;
-use Carbon\Carbon;
+use App\Models\RegistrasiPeriksa;
+use App\Models\RujukanInternal;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class PasienController extends Controller
 {
@@ -19,19 +18,19 @@ class PasienController extends Controller
     {
         $user = Auth::user();
         $noRawat = str_replace('-', '/', $noRawat);
-        $pasien = RegistrasiModel::query()
+        $registrasiPeriksa = RegistrasiPeriksa::query()
             ->where("no_rawat", $noRawat)
             ->where("kd_dokter", $user->kd_dokter)
             ->where("stts", "!=", "Batal")
             ->first();
-        if (!$pasien) {
+        if (!$registrasiPeriksa) {
             throw new HttpResponseException(response([
                 "error" => [
                     "pesan" => "PASIEN DENGAN NO. RAWAT " . $noRawat . " TIDAK DITEMUKAN"
                 ]
             ], 404));
         }
-        return new PasienResource($pasien);
+        return new PasienResource($registrasiPeriksa);
     }
 
     public function listData(InputParameterRequest $request): PasienColletion
@@ -43,7 +42,7 @@ class PasienController extends Controller
         $halaman = $data['halaman'] ?? 1;
         $limit = $data['limit'] ?? 10;
 
-        $pasien = RegistrasiModel::with(['dokter', 'pasien', 'rujukanInternal', 'poli'])
+        $listRegistrasiPeriksa = RegistrasiPeriksa::with(['dokter', 'pasien', 'rujukanInternal', 'poliklinik'])
             ->where('kd_dokter', $user->kd_dokter)
             ->where('tgl_registrasi', '>=', $tanggalAwal)
             ->where('tgl_registrasi', '<=', $tanggalAkhir)
@@ -51,25 +50,24 @@ class PasienController extends Controller
 
         $pencarian = $request->input('pencarian');
         if ($pencarian) {
-            $pasien = $this->builderPencarian($pasien, $pencarian);
+            $listRegistrasiPeriksa = $this->builderPencarian($listRegistrasiPeriksa, $pencarian);
         }
 
-        $pasien = $pasien->orderBy('tgl_registrasi', 'ASC')
+        $listRegistrasiPeriksa = $listRegistrasiPeriksa->orderBy('tgl_registrasi', 'ASC')
             ->orderBy('jam_reg', 'ASC')
             ->paginate(perPage: $limit, page: $halaman);
 
-        return new PasienColletion($pasien);
+        return new PasienColletion($listRegistrasiPeriksa);
     }
 
     public function detailRujukan(string $noRawat): PasienResource
     {
         $user = Auth::user();
         $noRawat = str_replace('-', '/', $noRawat);
-        $rujukan = RujukanInternalModel::query()
+        $rujukan = RujukanInternal::query()
             ->where('no_rawat', $noRawat)
             ->where('kd_dokter', $user->kd_dokter)
             ->first();
-
         if (!$rujukan) {
             throw new HttpResponseException(response([
                 "error" => [
@@ -78,7 +76,7 @@ class PasienController extends Controller
             ], 404));
         }
 
-        return new PasienResource($rujukan->registrasi);
+        return new PasienResource($rujukan->registrasiPeriksa);
     }
 
     public function listDataRujukan(InputParameterRequest $request): PasienColletion
@@ -90,7 +88,7 @@ class PasienController extends Controller
         $halaman = $data['halaman'] ?? 1;
         $limit = $data['limit'] ?? 10;
 
-        $pasien = RegistrasiModel::with(['dokter', 'pasien', 'rujukanInternal', 'poli'])
+        $listDataRujukan = RegistrasiPeriksa::with(['dokter', 'pasien', 'rujukanInternal', 'poliklinik'])
             ->whereRelation('rujukanInternal', 'kd_dokter', $user->kd_dokter)
             ->where('tgl_registrasi', '>=', $tanggalAwal)
             ->where('tgl_registrasi', '<=', $tanggalAkhir)
@@ -98,14 +96,14 @@ class PasienController extends Controller
 
         $pencarian = $request->input('pencarian');
         if ($pencarian) {
-            $pasien = $this->builderPencarian($pasien, $pencarian);
+            $listDataRujukan = $this->builderPencarian($listDataRujukan, $pencarian);
         }
 
-        $pasien = $pasien->orderBy('tgl_registrasi', 'ASC')
+        $listDataRujukan = $listDataRujukan->orderBy('tgl_registrasi', 'ASC')
             ->orderBy('jam_reg', 'ASC')
             ->paginate(perPage: $limit, page: $halaman);
 
-        return new PasienColletion($pasien);
+        return new PasienColletion($listDataRujukan);
     }
 
     private function builderPencarian(Builder $pasien, string $pencarian): Builder

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class UserModel extends Model implements Authenticatable
+class UserErm extends Model implements Authenticatable
 {
     use HasUuids;
 
@@ -20,7 +20,7 @@ class UserModel extends Model implements Authenticatable
     protected $fillable = ['id','kd_dokter','expired_at'];
 
     public function dokter(): BelongsTo {
-        return $this->belongsTo(DokterModel::class,"kd_dokter", "kd_dokter");
+        return $this->belongsTo(Dokter::class,"kd_dokter", "kd_dokter");
     }
 
     public function getAuthIdentifierName()

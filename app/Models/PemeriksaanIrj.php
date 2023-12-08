@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PemeriksaanIrjModel extends Model
+class PemeriksaanIrj extends Model
 {
     /**
      * @var array|mixed|string|string[]
@@ -18,12 +18,12 @@ class PemeriksaanIrjModel extends Model
     public $timestamps = false;
     protected $fillable = ["no_rawat","tgl_perawatan","jam_rawat","suhu_tubuh","tensi","nadi","respirasi","tinggi","berat","spo2","gcs","kesadaran","keluhan","pemeriksaan","alergi","lingkar_perut","rtl","penilaian","instruksi","evaluasi","nip"];
 
-    public function registrasi(): BelongsTo {
-        return $this->belongsTo(RegistrasiModel::class, 'no_rawat', 'no_rawat');
+    public function registrasiPeriksa(): BelongsTo {
+        return $this->belongsTo(RegistrasiPeriksa::class, 'no_rawat', 'no_rawat');
     }
 
     public function dokter(): BelongsTo {
-        return $this->belongsTo(DokterModel::class, 'nip', 'kd_dokter');
+        return $this->belongsTo(Dokter::class, 'nip', 'kd_dokter');
     }
 
     protected function getKeyForSaveQuery()

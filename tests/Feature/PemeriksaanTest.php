@@ -2,17 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Models\PemeriksaanIrjModel;
-use Carbon\Carbon;
+use App\Models\PemeriksaanIrj;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class PemeriksaanTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -80,7 +77,7 @@ class PemeriksaanTest extends TestCase
             ->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testSimpanPemeriksaanPasienSukses"]);
-        PemeriksaanIrjModel::query()
+        PemeriksaanIrj::query()
             ->where("no_rawat", $response['data']['noRawat'])
             ->where('tgl_perawatan', $response['data']['tanggalPerawatan'])
             ->where('jam_rawat', $response['data']['jamPerawatan'])
@@ -147,7 +144,7 @@ class PemeriksaanTest extends TestCase
             )->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testSimpanPemeriksaanPasienRujukanSukses"]);
-        PemeriksaanIrjModel::query()
+        PemeriksaanIrj::query()
             ->where("no_rawat", $response['data']['noRawat'])
             ->where('tgl_perawatan', $response['data']['tanggalPerawatan'])
             ->where('jam_rawat', $response['data']['jamPerawatan'])
@@ -734,7 +731,7 @@ class PemeriksaanTest extends TestCase
         ])->json();
 
         $response = $this->get(
-            uri: '/api/irj/pasien/00153605/pemeriksaan?tanggalAwal=2023-11-30&tanggalAkhir='.date('Y-m-d', strtotime(Carbon::now())),
+            uri: '/api/irj/pasien/00153605/pemeriksaan?tanggalAwal=2023-11-30&tanggalAkhir=' . date('Y-m-d', strtotime(Carbon::now())),
             headers: [
                 'Authorization' => $login['data']['token']
             ])->assertStatus(200)
@@ -812,9 +809,10 @@ class PemeriksaanTest extends TestCase
             "password" => "TEST"
         ])->json();
 
-        $response = $this->get(uri: '/api/irj/pasien/00153605/pemeriksaan?tanggalAwal=2023-11-30&tanggalAkhir='.date('Y-m-d', strtotime(Carbon::now())).'&pencarian=nyeri%20dada', headers: [
-            'Authorization' => $login['data']['token']
-        ])->assertStatus(200)
+        $response = $this->get(
+            uri: '/api/irj/pasien/00153605/pemeriksaan?tanggalAwal=2023-11-30&tanggalAkhir=' . date('Y-m-d', strtotime(Carbon::now())) . '&pencarian=nyeri%20dada',
+            headers: ['Authorization' => $login['data']['token']])
+            ->assertStatus(200)
             ->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testPencarianPemeriksaanPasien"]);

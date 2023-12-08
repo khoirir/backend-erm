@@ -4,17 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserLoginRequest;
 use App\Http\Resources\UserResource;
-use App\Models\DokterModel;
-use App\Models\PegawaiModel;
-use App\Models\UserModel;
-use Carbon\Carbon;
+use App\Models\Pegawai;
+use App\Models\UserErm;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Builder;
 
 class UserController extends Controller
 {
@@ -38,12 +35,10 @@ class UserController extends Controller
             ], 401));
         }
 
-        $pegawai = PegawaiModel::query()
+        $pegawai = Pegawai::query()
             ->where('nik', $cekUser->kd_dokter)
             ->where('stts_aktif', '!=', 'KELUAR')
-            ->whereHas('dokter', function (Builder $builder) {
-                $builder->where('status', '1');
-            })
+            ->whereRelation('dokter', 'status', '1')
             ->first();
         if (!$pegawai) {
             throw new HttpResponseException(response([
@@ -53,7 +48,7 @@ class UserController extends Controller
             ], 401));
         }
 
-        $user = new UserModel([
+        $user = new UserErm([
             "kd_dokter" => $pegawai->dokter->kd_dokter,
             "expired_at" => Carbon::now()->addMonth()
         ]);

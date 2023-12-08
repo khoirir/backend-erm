@@ -41,4 +41,8 @@ Route::middleware(\App\Http\Middleware\ApiAuthMiddleware::class)->group(function
             'jamRawat' => '(([0-1][0-9])|([2][0-3])):([0-5][0-9]):([0-5][0-9])+'
         ]);
     });
+
+    Route::controller(\App\Http\Controllers\ReferensiResepController::class)->group(function () {
+        Route::get('/obat/{kodeDepo}', 'listDataBarang');
+    });
 });

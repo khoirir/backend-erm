@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class RujukanInternalModel extends Model
+class RujukanInternal extends Model
 {
     protected $table = "rujukan_internal_poli";
 
-    public function registrasi(): BelongsTo
+    public function registrasiPeriksa(): BelongsTo
     {
-        return $this->belongsTo(RegistrasiModel::class, "no_rawat", "no_rawat")
+        return $this->belongsTo(RegistrasiPeriksa::class, "no_rawat", "no_rawat")
             ->where("stts", "!=", "Batal");
     }
 }

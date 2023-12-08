@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\UserModel;
-use Carbon\Carbon;
+use App\Models\UserErm;
+use Illuminate\Support\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,11 +11,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApiAuthMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         $token = $request->header("Authorization");
@@ -25,7 +20,7 @@ class ApiAuthMiddleware
             $authenticate = false;
         }
 
-        $user = UserModel::where('id', $token)->first();
+        $user = UserErm::where('id', $token)->first();
         if (!$user || $user->expired_at <= Carbon::now()) {
             $authenticate = false;
         } else {

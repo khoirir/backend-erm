@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\UserModel;
-use Carbon\Carbon;
+use App\Models\UserErm;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
@@ -30,7 +30,7 @@ class UserTest extends TestCase
             ->json();
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLoginSuccess"]);
-        $user = UserModel::query()->where('kd_dokter', 'TEST')->first();
+        $user = UserErm::query()->where('kd_dokter', 'TEST')->first();
         self::assertNotNull($user);
 
     }
@@ -168,7 +168,7 @@ class UserTest extends TestCase
             "password" => "TEST"
         ])->json();
 
-        UserModel::query()->where('id', $login['data']['token'])
+        UserErm::query()->where('id', $login['data']['token'])
             ->update(['expired_at' => Carbon::now()]);
 
         $response = $this->delete(uri: '/api/user/logout', headers: [

@@ -4,33 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\InputParameterRequest;
 use App\Http\Requests\PemeriksaanRequest;
-use App\Http\Requests\RawatParameterRequest;
 use App\Http\Resources\PemeriksaanCollection;
 use App\Http\Resources\PemeriksaanResource;
-use App\Models\PasienModel;
-use App\Models\PemeriksaanIrjModel;
-use App\Models\RegistrasiModel;
-use App\Models\RujukanInternalModel;
-use App\Models\UserModel;
-use Carbon\Carbon;
+use App\Models\PemeriksaanIrj;
+use App\Models\RegistrasiPeriksa;
+use App\Models\RujukanInternal;
+use App\Models\UserErm;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class PemeriksaanController extends Controller
 {
-    private function getRegistrasiPasien(string $noRawat, UserModel $userModel): void
+    private function getRegistrasiPasien(string $noRawat, UserErm $userModel): void
     {
-        $registrasiPasien = RegistrasiModel::query()
+        $registrasiPasien = RegistrasiPeriksa::query()
             ->where("no_rawat", $noRawat)
             ->where("kd_dokter", $userModel->kd_dokter)
             ->where("stts", "!=", "Batal")
             ->first();
         if (!$registrasiPasien) {
-            $rujukanPasien = RujukanInternalModel::query()
+            $rujukanPasien = RujukanInternal::query()
                 ->where('no_rawat', $noRawat)
                 ->where('kd_dokter', $userModel->kd_dokter)
                 ->first();
@@ -46,15 +42,15 @@ class PemeriksaanController extends Controller
 
     private function builderPemeriksaanIrjPasien(string $noRawat, string $tanggalRawat, string $jamRawat): Builder
     {
-        return PemeriksaanIrjModel::query()
+        return PemeriksaanIrj::query()
             ->where('no_rawat', $noRawat)
             ->where('tgl_perawatan', $tanggalRawat)
             ->where('jam_rawat', $jamRawat);
     }
 
-    private function getPemeriksaanIrjPasien(string $noRawat, string $tanggalRawat, string $jamRawat): PemeriksaanIrjModel
+    private function getPemeriksaanIrjPasien(string $noRawat, string $tanggalRawat, string $jamRawat): PemeriksaanIrj
     {
-        $pemeriksaanIrjPasien = PemeriksaanIrjModel::where('no_rawat', $noRawat)
+        $pemeriksaanIrjPasien = PemeriksaanIrj::where('no_rawat', $noRawat)
             ->where('tgl_perawatan', $tanggalRawat)
             ->where('jam_rawat', $jamRawat)
             ->first();
@@ -115,7 +111,7 @@ class PemeriksaanController extends Controller
             ], 400));
         }
 
-        $pemeriksaanIrjPasien = new PemeriksaanIrjModel($this->transformRequestData($data));
+        $pemeriksaanIrjPasien = new PemeriksaanIrj($this->transformRequestData($data));
         $pemeriksaanIrjPasien->no_rawat = $noRawat;
         $pemeriksaanIrjPasien->nip = $user->kd_dokter;
         $pemeriksaanIrjPasien->save();
@@ -205,8 +201,8 @@ class PemeriksaanController extends Controller
         $halaman = $data['halaman'] ?? 1;
         $limit = $data['limit'] ?? 10;
 
-        $pemeriksaanIrjPasien = PemeriksaanIrjModel::with(['registrasi', 'dokter', 'dokter.pegawai'])
-            ->whereRelation('registrasi', 'no_rkm_medis', $noRM)
+        $pemeriksaanIrjPasien = PemeriksaanIrj::with(['registrasiPeriksa', 'dokter', 'dokter.pegawai'])
+            ->whereRelation('registrasiPeriksa', 'no_rkm_medis', $noRM)
             ->where('tgl_perawatan', '>=', $tanggalAwal)
             ->where('tgl_perawatan', '<=', $tanggalAkhir);
 
