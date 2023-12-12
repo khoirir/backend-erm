@@ -124,6 +124,23 @@ class UserTest extends TestCase
 
         Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLoginPasswordSalah"]);
     }
+    public function testLoginGagal()
+    {
+        $response = $this->post('/api/user/login', [
+            "username" => "TEST",
+            "password" => "TEST"
+        ])->assertStatus(500)
+            ->assertJson([
+                "error" => [
+                    "pesan" => "TERJADI MASALAH PADA SERVER"
+                ]
+            ])
+            ->json();
+
+        Log::info(json_encode($response, JSON_PRETTY_PRINT), ["testLoginGagal"]);
+
+    }
+
 
     public function testLogoutSukses()
     {

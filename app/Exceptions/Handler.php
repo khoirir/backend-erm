@@ -3,8 +3,10 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
+use Symfony\Component\ErrorHandler\Error\FatalError;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -27,8 +29,14 @@ class Handler extends ExceptionHandler
             if ($e instanceof NotFoundHttpException) {
                 return $this->handleNotFound($request);
             }
+            if ($e instanceof ModelNotFoundException) {
+                return $this->handleModelNotFound($request);
+            }
             if ($e instanceof MethodNotAllowedHttpException) {
                 return $this->handleMethodNotAllowed($request);
+            }
+            if ($this->isHttpException($e)) {
+                return $this->handleInternalServerError($request);
             }
         });
     }
@@ -44,6 +52,17 @@ class Handler extends ExceptionHandler
         }
     }
 
+    protected function handleModelNotFound(Request $request)
+    {
+        if ($request->is('api/*')) {
+            return response()->json([
+                'error' => [
+                    'pesan' => 'DATA TIDAK DITEMUKAN'
+                ]
+            ], 404);
+        }
+    }
+
     protected function handleMethodNotAllowed(Request $request)
     {
         if ($request->is('api/*')) {
@@ -52,6 +71,17 @@ class Handler extends ExceptionHandler
                     'pesan' => 'METHOD TIDAK DIIZINKAN'
                 ]
             ], 405);
+        }
+    }
+
+    protected function handleInternalServerError(Request $request)
+    {
+        if ($request->is('api/*')) {
+            return response()->json([
+                'error' => [
+                    'pesan' => 'TERJADI MASALAH PADA SERVER'
+                ]
+            ], 500);
         }
     }
 }

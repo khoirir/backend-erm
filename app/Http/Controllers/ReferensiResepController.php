@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\InputParameterRequest;
+use App\Http\Resources\AturanPakaiCollection;
 use App\Http\Resources\BarangCollection;
+use App\Http\Resources\MetodeRacikCollection;
+use App\Models\AturanPakai;
 use App\Models\Barang;
 use App\Models\GudangBarang;
+use App\Models\MetodeRacik;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,9 +24,9 @@ class ReferensiResepController extends Controller
         $limit = $data['limit'] ?? 10;
 
         $listObat = Barang::with(['jenisBarang', 'kategoriBarang', 'golonganBarang'])
-            ->select(['databarang.*','gudangbarang.stok AS stok'])
+            ->select(['databarang.*', 'gudangbarang.stok AS stok'])
             ->join('gudangbarang', 'databarang.kode_brng', '=', 'gudangbarang.kode_brng')
-            ->where('gudangbarang.kd_bangsal', '=', $kodeDepo)
+            ->where('gudangbarang.kd_bangsal', $kodeDepo)
             ->where('databarang.status', '1');
 
         $pencarian = $request->input('pencarian');
@@ -48,5 +52,29 @@ class ReferensiResepController extends Controller
             ->paginate(perPage: $limit, page: $halaman);
 
         return new BarangCollection($listObat);
+    }
+
+    public function listAturanPakai(InputParameterRequest $request): AturanPakaiCollection
+    {
+        $request->validated();
+
+        $pencarian = $request->input('pencarian');
+        $listAturanPakai = AturanPakai::query()->when($pencarian, function ($query, $pencarian) {
+            return $query->where('aturan', 'like', '%' . $pencarian . '%');
+        })->get();
+
+        return new AturanPakaiCollection($listAturanPakai);
+    }
+
+    public function listMetodeRacik(InputParameterRequest $request): MetodeRacikCollection
+    {
+        $request->validated();
+
+        $pencarian = $request->input('pencarian');
+        $listMetodeRacik = MetodeRacik::query()->when($pencarian, function ($query, $pencarian) {
+            return $query->where('nm_racik', 'like', '%' . $pencarian . '%');
+        })->get();
+
+        return new MetodeRacikCollection($listMetodeRacik);
     }
 }

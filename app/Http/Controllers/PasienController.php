@@ -21,7 +21,6 @@ class PasienController extends Controller
         $registrasiPeriksa = RegistrasiPeriksa::query()
             ->where("no_rawat", $noRawat)
             ->where("kd_dokter", $user->kd_dokter)
-            ->where("stts", "!=", "Batal")
             ->first();
         if (!$registrasiPeriksa) {
             throw new HttpResponseException(response([
@@ -45,8 +44,7 @@ class PasienController extends Controller
         $listRegistrasiPeriksa = RegistrasiPeriksa::with(['dokter', 'pasien', 'rujukanInternal', 'poliklinik'])
             ->where('kd_dokter', $user->kd_dokter)
             ->where('tgl_registrasi', '>=', $tanggalAwal)
-            ->where('tgl_registrasi', '<=', $tanggalAkhir)
-            ->where('stts', '!=', 'Batal');
+            ->where('tgl_registrasi', '<=', $tanggalAkhir);
 
         $pencarian = $request->input('pencarian');
         if ($pencarian) {
@@ -91,8 +89,7 @@ class PasienController extends Controller
         $listDataRujukan = RegistrasiPeriksa::with(['dokter', 'pasien', 'rujukanInternal', 'poliklinik'])
             ->whereRelation('rujukanInternal', 'kd_dokter', $user->kd_dokter)
             ->where('tgl_registrasi', '>=', $tanggalAwal)
-            ->where('tgl_registrasi', '<=', $tanggalAkhir)
-            ->where('stts', '!=', 'Batal');
+            ->where('tgl_registrasi', '<=', $tanggalAkhir);
 
         $pencarian = $request->input('pencarian');
         if ($pencarian) {

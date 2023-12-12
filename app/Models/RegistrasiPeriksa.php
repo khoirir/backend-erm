@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class RegistrasiPeriksa extends Model
 {
     protected $table = "reg_periksa";
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('tidakBatalPeriksa', function (Builder $builder) {
+            $builder->where('stts', '!=', 'Batal');
+        });
+    }
 
     public function pasien() : BelongsTo {
         return $this->belongsTo(Pasien::class, 'no_rkm_medis', 'no_rkm_medis');

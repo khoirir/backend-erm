@@ -44,5 +44,7 @@ Route::middleware(\App\Http\Middleware\ApiAuthMiddleware::class)->group(function
 
     Route::controller(\App\Http\Controllers\ReferensiResepController::class)->group(function () {
         Route::get('/obat/{kodeDepo}', 'listDataBarang');
+        Route::get('/aturan-pakai', 'listAturanPakai');
+        Route::get('/metode-racik', 'listMetodeRacik');
     });
 });
